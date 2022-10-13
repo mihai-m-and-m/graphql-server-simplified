@@ -2,17 +2,17 @@
 
 Get a full GraphQL API server with MongoDB database from a simple json file.
 
-Edit the data.json file as you need to create a fully functional backend express server with MongoDB database
+Edit the `data.json` file as you need to create a fully functional backend express server with MongoDB database
 
 # Example
 
-Define "Schemas" as an object inside data.json file from root folder
-Specify the "model/table/schema" name as object key with values as an array where inside every object will represent the "field" from database/graphql
-Useing "\_\_noDB" at the end of table name will not be used as field into database.
+Define "Schemas" as an object inside data.json file from root folder \
+Specify the "model/table/schema" name as object key with values as an array where inside every object will represent the "field" from database/graphql \
+Using "\_\_noDB" at the end of table name will not be used as field into database.
 Every "field" should have a "name" and "types" keys. Also you can optionally add "required", "unique", "select", "default", "ref", "field"
 
 Example of Schemas:
-`
+```js
 "Schemas": {
 "users": [
 {"name": "_id","types": "ID","required": "true","unique": "true"},
@@ -50,4 +50,4 @@ Example of Schemas:
 {"name": "tokenExp", "types": "Str", "required": "true"}
 ]
 }
-`
+```
