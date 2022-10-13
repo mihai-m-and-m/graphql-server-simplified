@@ -12,7 +12,7 @@ Useing "\_\_noDB" at the end of table name will not be used as field into databa
 Every "field" should have a "name" and "types" keys. Also you can optionally add "required", "unique", "select", "default", "ref", "field"
 
 Example of Schemas:
-<code>
+`
 "Schemas": {
 "users": [
 {"name": "_id","types": "ID","required": "true","unique": "true"},
@@ -50,4 +50,4 @@ Example of Schemas:
 {"name": "tokenExp", "types": "Str", "required": "true"}
 ]
 }
-<code>
+`
