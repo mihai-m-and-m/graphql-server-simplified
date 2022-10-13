@@ -29,5 +29,6 @@
   "devDependencies": {
     "nodemon": "^2.0.20"
   },
-  "peerDependencies": {}
+  "peerDependencies": {},
+  "repository": "https://github.com/mihai-m-and-m/backend.git"
 }
