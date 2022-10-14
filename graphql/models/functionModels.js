@@ -6,58 +6,45 @@
 ********/
 
 const mongoose = require("mongoose");
-const { error_set } = require("../../errors/error_logs");
+const { error_set, errors_logs } = require("../../errors/error_logs");
 const { Schemas } = require("../../data.json");
 
 //
 // 1. Check the "Schemas" object from data.json file
 //
 const keys = Object.keys(
-  Schemas ? Schemas : error_set("noSchema", "Schemas from Models")
+  Schemas ? Schemas : error_set("noSchema", "Schemas for Models")
 );
-
-const getSchemas = (item) => {
-  try {
-    const fields = Object.values(Schemas[item]);
-    return fields;
-  } catch (err) {
-    error_set("noSchemaItem", err);
-  }
-};
 
 //
 // 2. Assign "type" and options for each field from each key inside "Schema" object
 //
 const schemaFields = (fieldName) => {
+  let obj = {};
   try {
-    const newObject = Object.assign(
-      {},
-      ...fieldName.map((item) => {
-        if (item.types === "ID") return;
-        else if (item.types === "Str") item.type = String;
-        else if (item.types === "Int" || item.types === "Float")
-          item.type = Number;
-        else if (item.types === "Boolean") item.type = Boolean;
-        else if (item.types === "Float") item.type = Number;
-        else if (item.types === "Date") item.type = Date;
-        else item.type = mongoose.Schema.Types.ObjectId;
-        let field = {};
-        if (item.types === "list") {
-          field[item.name] = [{ type: item.type }];
-        } else {
-          field[item.name] = { type: item.type };
-        }
-        if (item.required) field[item.name].required = true;
-        if (item.select) field[item.name].select = false;
-        if (item.unique) field[item.name].unique = true;
-        if (item.default) field[item.name].default = item.default;
-        if (item.ref) field[item.name].ref = item.ref;
-        return field;
-      })
-    );
-    return newObject;
+    fieldName.map((field) => {
+      let name = mongoose.Schema.Types.ObjectId;
+      if (field.types.includes("ID")) return;
+      if (field.types.includes("Int") || field.types.includes("Float"))
+        name = Number;
+      field.types.includes("Str") && (name = String);
+      field.types.includes("Boolean") && (name = Boolean);
+      field.types.includes("Date") && (name = Date);
+
+      if (field.types.includes("list")) obj[field.name] = [{ type: name }];
+      else obj[field.name] = { type: name };
+
+      field.required && (obj[field.name].required = true);
+      field.select && (obj[field.name].select = false);
+      field.unique && (obj[field.name].unique = true);
+      field.default && (obj[field.name].default = field.default);
+      field.ref && (obj[field.name].ref = field.ref);
+    });
+    return obj;
   } catch (err) {
+    errors_logs(err);
     error_set("noSchemaItemFields", fieldName + err);
+    throw err;
   }
 };
 
@@ -65,12 +52,15 @@ const schemaFields = (fieldName) => {
 // 3. Create Schema for each keys inside the "Schemas" object and save it in an new object
 //
 let allSchemas = {};
-const createSchema = (schemaName, fields) => {
+const createSchema = (schemaName, field) => {
   const names = schemaName;
   try {
-    schemaName = new mongoose.Schema(schemaFields(getSchemas(fields)), {
-      timestamps: true,
-    });
+    schemaName = new mongoose.Schema(
+      schemaFields(Object.values(Schemas[field])),
+      {
+        timestamps: true,
+      }
+    );
     allSchemas[`${names}`] = schemaName;
     return schemaName;
   } catch (err) {
@@ -105,7 +95,7 @@ for (let i = 0; i < keys.length; i++) {
     models[keys[i]] = createModel(keys[i], keys[i] + "Schema");
 }
 
-module.exports = { models, searchSchemas, getSchemas };
+module.exports = { models, searchSchemas };
 
 /******** Create Custom Scheme in diferent file
 const { schemaFields } = require("../models/functionModels");

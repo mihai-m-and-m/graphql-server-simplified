@@ -1,3 +1,7 @@
+/******** FILE FORMAT 
+1. 
+********/
+
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../../utils/jsonwebtoken");
 const { encrypt } = require("../../utils/encrypt");

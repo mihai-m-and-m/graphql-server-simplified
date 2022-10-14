@@ -2,13 +2,8 @@
 1. 
 ********/
 
-// Import required from graphql
 const { GraphQLSchema, GraphQLObjectType } = require("graphql");
-
-// Import Queries
 const { Query } = require("../queries/functionQueries");
-
-// Import Mutations
 const { setAllMutations } = require("../mutations/mutation");
 
 // Define QueryType

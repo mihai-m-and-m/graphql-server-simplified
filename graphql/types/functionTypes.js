@@ -13,7 +13,6 @@ const {
   GraphQLFloat,
 } = require("graphql");
 const { Schemas } = require("../../data.json");
-const { getSchemas } = require("../models/functionModels");
 const { nestedQueryResolvers } = require("../resolvers/resolversQueries");
 const { error_set } = require("../../errors/error_logs");
 
@@ -22,7 +21,7 @@ var values = Object.values(Schemas);
 
 const objectTypes = (schemaName) => {
   try {
-    const TypesFields = getSchemas(schemaName);
+    const TypesFields = Object.values(Schemas[schemaName]);
     const newObject = Object.assign(
       {},
       ...TypesFields.map((item) => {

@@ -1,3 +1,7 @@
+/******** FILE FORMAT 
+1. 
+********/
+
 const { error_set } = require("../errors/error_logs");
 
 const find_by_id = async (db_table, id_value, db_type = "mangodb") => {

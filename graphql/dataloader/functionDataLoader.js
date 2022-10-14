@@ -4,17 +4,19 @@
 
 const DataLoader = require("dataloader");
 const _ = require("lodash");
-const { models, getSchemas } = require("../models/functionModels");
+const { models } = require("../models/functionModels");
 
-const data = require("../../data.json");
-var fields = Object.keys(data.Schemas);
+const { Schemas } = require("../../data.json");
+
+var fields = Object.keys(Schemas);
 
 var obj_loader = {};
 
 //console.log(fields);
 
 const b = fields.map((schema) => {
-  const a = getSchemas(schema).map((item) => {
+  const fields = Object.values(Schemas[schema]);
+  const a = fields.map((item) => {
     if (item.ref) {
       const batch = async (keys, models) => {
         //console.log(keys);

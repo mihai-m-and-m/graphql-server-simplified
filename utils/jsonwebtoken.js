@@ -1,3 +1,7 @@
+/******** FILE FORMAT 
+1. Generate jsonwebtoken
+********/
+
 const jwt = require("jsonwebtoken");
 
 const generateToken = (id, info) => {

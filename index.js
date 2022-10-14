@@ -15,6 +15,9 @@ async function backend() {
   if (settings.backend === "graphql") {
     api_server = require("./graphql/graphql");
   }
+  if (settings.backend === "rest-api") {
+    api_server = require("./rest-api/restful");
+  }
 }
 
 const server = async () => {
@@ -22,7 +25,7 @@ const server = async () => {
   await database();
   console.log(
     `\x1b[32m%s\x1b[0m`,
-    `Welcome to m&m server ~ everything work's smooth`
+    `Welcome to m&m server ~ everything working smooth`
   );
 };
 

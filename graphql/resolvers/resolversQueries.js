@@ -3,7 +3,7 @@
 ********/
 
 const data = require("../../data.json");
-const { models, searchSchemas } = require("../models/functionModels");
+const { models } = require("../models/functionModels");
 //const types = require("../types/functionTypes");
 const { functionBatches } = require("../dataloader/functionDataLoader");
 const { filterQueryResolvers } = require("../filters/filters");

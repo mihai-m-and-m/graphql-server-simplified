@@ -74,14 +74,6 @@ module.exports = { Query, setQueriesFields };
 
 /* example
 
-const getAllUsers = {
-  type: new GraphQLList(UserType),
-  description: "Get all users",
-  resolve(parent, args) {
-    return User.find();
-  },
-};
-
 const getUser = {
   type: UserType,
   description: "Get one user",

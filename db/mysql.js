@@ -1,3 +1,7 @@
+/******** FILE FORMAT 
+1. 
+********/
+
 const mysql = require("mysql2");
 
 const connectDB = async () => {

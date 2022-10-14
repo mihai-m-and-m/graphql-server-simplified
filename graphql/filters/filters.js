@@ -12,10 +12,9 @@ const {
   GraphQLID,
 } = require("graphql");
 
-const { getSchemas } = require("../models/functionModels");
 const { Schemas } = require("../../data.json");
 
-var keys = Object.keys(Schemas);
+const keys = Object.keys(Schemas);
 
 const filterQueryResolvers = (values, items) => {
   Object.keys(values).forEach((key) => {
@@ -71,7 +70,7 @@ const createFilterInput = (schemaName, filterName) => {
   try {
     schemaName = new GraphQLInputObjectType({
       name: schemaName + filterName,
-      fields: filterFields(getSchemas(schemaName)),
+      fields: filterFields(Object.values(Schemas[schemaName])),
     });
     if (filterName === "Filter")
       schemaName.description =
