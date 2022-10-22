@@ -10,7 +10,7 @@ const { error_set, errors_logs } = require("../../errors/error_logs");
 
 const { models } = require("../models/functionModels");
 const {
-  find_in_database,
+  find_one_in_database,
   save_in_database,
   update_in_database,
   find_by_id,
@@ -44,7 +44,7 @@ const mutation_resolver = async (mutation, parent, args, req) => {
 
     //console.time("Execution Time 'for of' function");
     for (const check of checksF) {
-      const check_false = await find_in_database(
+      const check_false = await find_one_in_database(
         models[check[0]],
         [check[1]],
         args[check[1]]
@@ -65,7 +65,7 @@ const mutation_resolver = async (mutation, parent, args, req) => {
             args_obj[encrypted_field[0]]
           );
         } else {
-          find_field = await find_in_database(
+          find_field = await find_one_in_database(
             models[key],
             values[0][0],
             args_obj[values[0][0]],

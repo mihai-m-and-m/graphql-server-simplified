@@ -31,6 +31,7 @@ for (const mutation of getAllMutations) {
     type: types[`${mutationFields.target}Type`],
     args: setTypes(mutationFields.args),
     async resolve(parent, args, req) {
+      //console.log(req.dataloader);
       if (protect && !req.isAuth) error_set("checkisAuth", req.isAuth);
 
       const level = req?.token?.info?.adminlevel;
