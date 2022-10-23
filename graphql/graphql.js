@@ -3,6 +3,7 @@
 ********/
 
 const { graphqlHTTP } = require("express-graphql");
+const depthLimit = require("graphql-depth-limit");
 const cors = require("cors");
 const express = require("express");
 const server = express();
@@ -26,7 +27,7 @@ server.use(
   graphqlHTTP({
     schema: schema,
     graphiql: true,
-    //context: obj_loader,
+    validationRules: [depthLimit(10)],
   })
 );
 
