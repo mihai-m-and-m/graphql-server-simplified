@@ -2,7 +2,7 @@
 
 Get a full GraphQL API server with MongoDB database from a simple json file.
 
-This server includes `express, express-graphql, graphql, mongoose, cors, dataloader, dotenv, mysql2` packages as default.
+This server includes `express, express-graphql, graphql, mongoose, cors, dataloader, dotenv, mysql2, graphql-depth-limit` packages as default.
 
 Also using `bcryptjs` to encrypt special password field (or any other field if you wish) and `jsonwebtoken` to secure protect the server.
 
@@ -15,6 +15,7 @@ Edit the `data.json` file as you need to create a fully functional backend expre
 And of course rename the file `.env.RENAME` to `.env` and fill it with your own database connection.
 
 ## 1st Step - define Schema (model, table, types) with single definition
+
 Define "Schemas" as key inside `data.json` file from root folder.
 
 Value will be one object with keys as tables inside database
@@ -25,26 +26,28 @@ Every "field" should have `name` and `types` keys. Also you can optionally add `
 Because of MongoDB structure we recommand to always define first field as `_id`.
 
 ### Supported Schema types
+
 | Types   | GraphQL Type         |
-|---------|----------------------|
+| ------- | -------------------- |
 | ID      | `GraphQLID`          |
-| Int	  | `GraphQLInt`         |
-| Float	  | `GraphQLFloat`       |
+| Int     | `GraphQLInt`         |
+| Float   | `GraphQLFloat`       |
 | Boolean | `GraphQLBoolean`     |
-| Str	  | `GraphQLString`      |
+| Str     | `GraphQLString`      |
 | list    | `GraphQLList`of ID's |
 | single  | `GraphQLID`          |
 
-| Optional fields param     |  Description					|	
-|---------------------------|---------------------------------------------------|
-| `required: true`	    |  make the field required (!)			|
-| `unique: true`	    |  make the field unique				|
-| `select: false`	    |  make the field unselectable from database	|
-| `default: <any>`	    |  specify default value				|
-| `ref: <schema_name>`	    |  reference another Schema name			|
-| `field: <field>`	    |  specify field to be refered from "ref" schema	|
+| Optional fields param | Description                                   |
+| --------------------- | --------------------------------------------- |
+| `required: true`      | make the field required (!)                   |
+| `unique: true`        | make the field unique                         |
+| `select: false`       | make the field unselectable from database     |
+| `default: <any>`      | specify default value                         |
+| `ref: <schema_name>`  | reference another Schema name                 |
+| `field: <field>`      | specify field to be refered from "ref" schema |
 
 ## 2nd Step - define Queries
+
 Define "Queries" as key inside `data.json` file from root folder.
 
 Value will be one object with keys as "Query root types"
@@ -56,12 +59,14 @@ Every key will have a value of object made of required `target`, `types` and `ar
 Also inside `args` adding `searchBy` key as `Str` will auto make a full "search type" including all fields from `target`
 
 ### Supported Queries types
-| Types   | Description GraphQL Type      |		
-|---------|-------------------------------|	
-| list    | returns `GraphQLList`of ID's  |	
-| single  | returns `GraphQLID`		  |
+
+| Types  | Description GraphQL Type     |
+| ------ | ---------------------------- |
+| list   | returns `GraphQLList`of ID's |
+| single | returns `GraphQLID`          |
 
 ## 3rd Step - define Mutations
+
 Define "Mutations" as key inside `data.json` file from root folder.
 
 Value will be one object with keys as "Mutations root types"
@@ -70,40 +75,44 @@ Every mutation will have a `target` and `args`
 
 Optional `checkT` and `checkF` for checks true (if exist execute) or false (if exist throw error) before execution of mutation. The format should be array of objects with table name as key and array of fields names as value
 
-`save` or `return` keys will make the mutation resolver as required. 
+`save` or `return` keys will make the mutation resolver as required.
 
 ### Special types for Mutations `args`
-| Value   	| Description of value Type     			|		
-|---------------|-------------------------------------------------------|
-| `email`   	| check for valid email address format			|	
-| `encrypt`	| encrypt the field with highly secure bcryptjs package |	
-| `!`		| add at end of value to be required		  	|
-| `jwt`		| value to be taken from `jsonwebtoken` 		|
 
-### Special types for Mutations `checkT` 
-| Value			| Description of value      			|		
-|-----------------------|-----------------------------------------------|
-| `__decrypt`   	| decrypt the field previous encrypted		|	
-| `__select`		| select field with `select: false` in schema	|	
-| `__jwt`		| compare with field in `jsonwebtoken`		|
-| `<args_key>__id`	| check args field with database _id 		|
+| Value     | Description of value Type                             |
+| --------- | ----------------------------------------------------- |
+| `email`   | check for valid email address format                  |
+| `encrypt` | encrypt the field with highly secure bcryptjs package |
+| `!`       | add at end of value to be required                    |
+| `jwt`     | value to be taken from `jsonwebtoken`                 |
+
+### Special types for Mutations `checkT`
+
+| Value            | Description of value                        |
+| ---------------- | ------------------------------------------- |
+| `__decrypt`      | decrypt the field previous encrypted        |
+| `__select`       | select field with `select: false` in schema |
+| `__jwt`          | compare with field in `jsonwebtoken`        |
+| `<args_key>__id` | check args field with database \_id         |
 
 ### Special types for Mutations `save` key
-| Value			| Description of value      				|		
-|-----------------------|-------------------------------------------------------|
-| `save`   		| save into specified table inside database 		|	
-| `<table>__<field>`	| update database specific table and field with id	|
+
+| Value              | Description of value                             |
+| ------------------ | ------------------------------------------------ |
+| `save`             | save into specified table inside database        |
+| `<table>__<field>` | update database specific table and field with id |
 
 ### Special types for Mutations `return` keys
 
-| Value			| Description of value      				|
-|-----------------------|-------------------------------------------------------|
-| `single`   		| saved object from database 				|
-| `<field>: <table>`	| diferent value for "field" from "table"		|
-| `__token`   		| add it at end to return the `jsonwebtoken`		|
-| `tokenExp`		| token expiration date defined in .env file		|
+| Value              | Description of value                       |
+| ------------------ | ------------------------------------------ |
+| `single`           | saved object from database                 |
+| `<field>: <table>` | diferent value for "field" from "table"    |
+| `__token`          | add it at end to return the `jsonwebtoken` |
+| `tokenExp`         | token expiration date defined in .env file |
 
-## Info: 
+## Info:
+
 Using `__noDB` at the end of table name will not be used as field into database.
 
 Using `__auth` at the end of Query/Mutation name will require a valid token (login function)
