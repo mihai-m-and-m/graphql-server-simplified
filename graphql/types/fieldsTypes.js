@@ -12,33 +12,32 @@ const {
   GraphQLNonNull,
 } = require("graphql");
 const { error_set, errors_logs } = require("../../errors/error_logs");
-const { filters } = require("../filters/filters");
 
-const setTypes = (object, target = "") => {
+const setTypes = (fieldType) => {
+  let type;
+  const stringType = ["Str", "email", "encrypt", "jwt"];
+  const idType = ["ID", "single", "__id"];
+
+  if (stringType.some((item) => fieldType.includes(item))) type = GraphQLString;
+  if (idType.some((item) => fieldType.includes(item))) type = GraphQLID;
+  if (fieldType.includes("Int")) type = GraphQLInt;
+  if (fieldType.includes("Boolean")) type = GraphQLBoolean;
+  if (fieldType.includes("Float")) type = GraphQLFloat;
+  if (fieldType.includes("list")) type = new GraphQLList(GraphQLID);
+  if (fieldType.includes("!", -1)) type = new GraphQLNonNull(type);
+
+  return type;
+};
+
+const setArgsTypes = (object, target = "") => {
   const types = Object.entries(object);
+
   let obj = {};
-  let name;
   try {
     for (const type of types) {
-      name = GraphQLString;
-      if (type[1].includes("Str")) name = GraphQLString;
-      if (type[1].includes("Int")) name = GraphQLInt;
-      if (type[1].includes("Boolean")) name = GraphQLBoolean;
-      if (type[1].includes("Float")) name = GraphQLFloat;
-      if (
-        type[1].includes("ID") ||
-        type[1].includes("single") ||
-        type[1].includes("__id")
-      )
-        name = GraphQLID;
-      if (type[1].includes("list")) name = new GraphQLList(GraphQLID);
-      if (type[1].includes("!", -1)) name = new GraphQLNonNull(name);
-
-      if (type[0] === "sortBy") name = filters[`${target}Filter`];
-      if (type[0] === "searchBy") name = filters[`${target}Search`];
-
-      obj[type[0]] = (type[0], { type: name });
+      obj[type[0]] = (type[0], { type: setTypes(type[1]) });
     }
+
     return obj;
   } catch (err) {
     errors_logs(err);
@@ -47,4 +46,4 @@ const setTypes = (object, target = "") => {
   }
 };
 
-module.exports = { setTypes };
+module.exports = { setTypes, setArgsTypes };

@@ -6,9 +6,14 @@ const { models } = require("../models/functionModels");
 const { filterQueryResolvers } = require("../filters/filters");
 const { error_set } = require("../../errors/error_logs");
 const { date } = require("../../utils/data_formats");
+const { find_all_in_database } = require("../../db/db_query");
 
 const nestedQueryResolvers = (parent, args, ctx, item) => {
   try {
+    /* TO DO
+      - extract the fields required from ctx to specify what to load and dont load twice
+      console.log(ctx.dataloader);
+      */
     const loaderName = item.ref + `_` + item.field + `_Loader`;
     let result;
     item.types === "list"
@@ -22,10 +27,9 @@ const nestedQueryResolvers = (parent, args, ctx, item) => {
 
 const queriesResolvers = async (parent, args, fieldName) => {
   try {
-    let items = await models[fieldName.target].find();
-    if (args.searchBy) items = filterQueryResolvers(args.searchBy, items);
-    else items = filterQueryResolvers(args, items);
-
+    //console.log(fieldName);
+    let items = await find_all_in_database(models[fieldName.target]);
+    items = filterQueryResolvers(args, items);
     const result = items.map((item) => {
       return {
         ...item._doc,

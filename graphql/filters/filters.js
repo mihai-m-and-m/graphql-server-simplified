@@ -2,21 +2,15 @@
 1. 
 ********/
 
-const {
-  GraphQLString,
-  GraphQLInt,
-  GraphQLBoolean,
-  GraphQLFloat,
-  GraphQLList,
-  GraphQLInputObjectType,
-  GraphQLID,
-} = require("graphql");
+const { GraphQLInputObjectType } = require("graphql");
 
 const { Schemas } = require("../../data.json");
+const { setTypes } = require("../types/fieldsTypes");
 
 const keys = Object.keys(Schemas);
 
 const filterQueryResolvers = (values, items) => {
+  values.searchBy && (values = values.searchBy);
   Object.keys(values).forEach((key) => {
     items = items.filter(
       (d) =>
@@ -27,24 +21,17 @@ const filterQueryResolvers = (values, items) => {
           .includes(values[key].toString().toLowerCase())
     );
   });
+
   return items;
 };
 
 const filterFields = (fieldName) => {
   try {
+    const field = Object.values(fieldName);
     const newObject = Object.assign(
       {},
-      ...fieldName.map((item) => {
-        if (item.types === "Str") item.type = GraphQLString;
-        else if (item.types === "Int") item.type = GraphQLInt;
-        else if (item.types === "single") item.type = GraphQLID;
-        else if (item.types === "Boolean") item.type = GraphQLBoolean;
-        else if (item.types === "Float") item.type = GraphQLFloat;
-        else if (item.types === "ID" || item.types === "list")
-          item.type = new GraphQLList(GraphQLID);
-        else item.type = GraphQLString;
-        const field = { [item.name]: { type: item.type } };
-        return field;
+      ...field.map((item) => {
+        return { [item.name]: { type: setTypes(item.types, "schema") } };
       })
     );
     return newObject;
@@ -54,23 +41,23 @@ const filterFields = (fieldName) => {
   }
 };
 
-const b = {
-  q: { type: GraphQLString },
-  id: { type: GraphQLString },
-  title: { type: GraphQLString },
-  views: { type: GraphQLInt },
-  views_lt: { type: GraphQLInt },
-  views_lte: { type: GraphQLInt },
-  views_gt: { type: GraphQLInt },
-  views_gte: { type: GraphQLInt },
-  user_id: { type: GraphQLString },
-};
+// const b = {
+//   q: { type: GraphQLString },
+//   id: { type: GraphQLString },
+//   title: { type: GraphQLString },
+//   views: { type: GraphQLInt },
+//   views_lt: { type: GraphQLInt },
+//   views_lte: { type: GraphQLInt },
+//   views_gt: { type: GraphQLInt },
+//   views_gte: { type: GraphQLInt },
+//   user_id: { type: GraphQLString },
+// };
 
 const createFilterInput = (schemaName, filterName) => {
   try {
     schemaName = new GraphQLInputObjectType({
       name: schemaName + filterName,
-      fields: filterFields(Object.values(Schemas[schemaName])),
+      fields: filterFields(Schemas[schemaName]),
     });
     if (filterName === "Filter")
       schemaName.description =
@@ -89,7 +76,7 @@ const filtersObj = () => {
   try {
     let obj = {};
     for (let i = 0; i < keys.length; i++) {
-      obj[keys[i] + `Filter`] = createFilterInput(keys[i], "Filter");
+      //obj[keys[i] + `Filter`] = createFilterInput(keys[i], "Filter");
       obj[keys[i] + `Search`] = createFilterInput(keys[i], "Search");
     }
     return obj;
@@ -99,5 +86,13 @@ const filtersObj = () => {
   }
 };
 const filters = filtersObj();
+
+// const setFilterType = (filterName, target) => {
+//   let name;
+//   if (filterName === "sortBy") name = filters[`${target}Filter`];
+//   if (filterName === "searchBy") name = filters[`${target}Search`];
+//   //console.log(name);
+//   return name;
+// };
 
 module.exports = { filters, filterQueryResolvers, filterFields };

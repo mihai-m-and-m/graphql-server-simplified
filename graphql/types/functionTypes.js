@@ -6,74 +6,75 @@ const {
   GraphQLObjectType,
   GraphQLList,
   GraphQLNonNull,
-  GraphQLID,
   GraphQLInt,
   GraphQLString,
-  GraphQLBoolean,
-  GraphQLFloat,
 } = require("graphql");
 const { Schemas } = require("../../data.json");
 const { nestedQueryResolvers } = require("../resolvers/resolversQueries");
 const { error_set } = require("../../errors/error_logs");
+const { setTypes } = require("./fieldsTypes");
 
-var keys = Object.keys(Schemas);
-var values = Object.values(Schemas);
+let object = Object.entries(Schemas);
 
 const objectTypes = (schemaName) => {
   try {
-    const TypesFields = Object.values(Schemas[schemaName]);
+    const TypesFields = Object.values(schemaName);
     const newObject = Object.assign(
       {},
       ...TypesFields.map((item) => {
-        if (item.types === "Str") item.type = GraphQLString;
-        else if (item.types === "Int") item.type = GraphQLInt;
-        else if (item.types === "ID") item.type = GraphQLID;
-        else if (item.types === "Boolean") item.type = GraphQLBoolean;
-        else if (item.types === "Float") item.type = GraphQLFloat;
-        if (item.types === "list" || item.types === "single") {
-          if (item.types === "list")
-            item.type = new GraphQLList(types[`${item.ref}Type`]);
-          if (item.types === "single") item.type = types[`${item.ref}Type`];
-          if (item.required) item.type = new GraphQLNonNull(item.type);
-          return {
-            [item.name]: {
-              type: item.type,
-              resolve(parent, args, info) {
-                return nestedQueryResolvers(parent, args, info, item);
-              },
+        let result = {};
+        if (item.ref) {
+          if (item.types.includes("list")) {
+            result.type = new GraphQLList(types[`${item.ref}Type`]);
+            result.args = { first: { type: GraphQLInt } };
+          }
+
+          item.types.includes("single") &&
+            (result.type = types[`${item.ref}Type`]);
+
+          result = {
+            ...result,
+            resolve(parent, args, info) {
+              return nestedQueryResolvers(parent, args, info, item);
             },
           };
+        } else {
+          result.type = setTypes(item.types);
+          if (item.required && !item.select)
+            result.type = new GraphQLNonNull(result.type);
         }
-        if (item.required && !item.select)
-          item.type = new GraphQLNonNull(item.type);
-        return { [item.name]: { type: item.type } };
+        return { [item.name]: result };
       })
     );
     if (!`${schemaName}`.includes("_noDB", -1)) {
       newObject.createdAt = { type: new GraphQLNonNull(GraphQLString) };
       newObject.updatedAt = { type: new GraphQLNonNull(GraphQLString) };
     }
+    //console.log(newObject);
     return newObject;
   } catch (err) {
     error_set("objectTypes", schemaName + err);
   }
 };
 
-const createType = (schemaName, fields) => {
+const createType = (schema) => {
   try {
+    let schemaName = schema[0];
+    let schemaFields = schema[1];
+
     schemaName = new GraphQLObjectType({
       name: schemaName,
-      fields: () => (fields ? fields : objectTypes(schemaName)),
+      fields: () => objectTypes(schemaFields),
     });
     return schemaName;
   } catch (err) {
-    error_set("createType", schemaName + fields + err);
+    error_set("createType", err);
   }
 };
 
 let types = {};
-for (let i = 0; i < values.length; i++) {
-  types[keys[i] + `Type`] = createType(keys[i]);
+for (let i = 0; i < object.length; i++) {
+  types[object[i][0] + `Type`] = createType(object[i]);
 }
 
 module.exports = { types, createType, objectTypes };

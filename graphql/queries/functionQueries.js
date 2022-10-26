@@ -8,7 +8,8 @@ const { Queries } = require("../../data.json");
 const { types } = require("../types/functionTypes");
 const { queriesResolvers } = require("../resolvers/resolversQueries");
 const { error_set } = require("../../errors/error_logs");
-const { setTypes } = require("../types/fieldsTypes");
+const { setArgsTypes } = require("../types/fieldsTypes");
+const { filters } = require("../filters/filters");
 
 //
 // 1. Assign each field values and resolver for each key inside Query
@@ -24,6 +25,11 @@ const setQueriesFields = (fieldName, protect) => {
       (fieldName.type = types[`${fieldName.target}Type`]);
 
     fieldName.resolve = (parent, args, req) => {
+      /* TO DO
+      - extract the protect (auth and admin) to separate function from "mutation" and "functionQueries" x 2
+      //console.log(req.dataloader);
+      */
+
       if (protect && !req.isAuth) error_set("checkisAuth", req.isAuth);
       const level = req?.token?.info?.adminlevel;
       if (protect && protect[2] && level >= 0 && !(level >= protect[2]))
@@ -32,7 +38,10 @@ const setQueriesFields = (fieldName, protect) => {
     };
 
     fieldName.args &&
-      (fieldName.args = setTypes(fieldName.args, fieldName.target));
+      (fieldName.args = setArgsTypes(fieldName.args, fieldName.target));
+
+    fieldName.args.searchBy &&
+      (fieldName.args.searchBy.type = filters[`${fieldName.target}Search`]);
 
     const field = { type: fieldName.type };
     fieldName.description && (field.description = fieldName.description);
@@ -55,6 +64,9 @@ const createQuerys = () => {
     for (let i = 0; i < keys.length; i++) {
       let protect;
       if (keys[i].includes("__")) {
+        /* TO DO
+      - extract the protect (auth and admin) to separate function from "mutation" and "functionQueries" x 2
+      */
         keys[i] = keys[i].split("__");
         if (keys[i][1].includes("auth") || keys[i][1].includes("adminlevel")) {
           protect = keys[i];
@@ -65,7 +77,7 @@ const createQuerys = () => {
     }
     return obj;
   } catch (err) {
-    error_set("createQuerys", keys[i] + err);
+    error_set("createQuerys", keys + err);
   }
 };
 const Query = createQuerys();

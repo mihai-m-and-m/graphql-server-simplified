@@ -5,7 +5,7 @@
 const { error_set } = require("../../errors/error_logs");
 const { types } = require("../types/functionTypes");
 const { Mutations } = require("../../data.json");
-const { setTypes } = require("../types/fieldsTypes");
+const { setArgsTypes } = require("../types/fieldsTypes");
 const { mutation_resolver } = require("./resolversMutations");
 
 const getAllMutations = Object.entries(Mutations);
@@ -29,9 +29,13 @@ for (const mutation of getAllMutations) {
 
   setAllMutations[mutationName] = {
     type: types[`${mutationFields.target}Type`],
-    args: setTypes(mutationFields.args),
+    args: setArgsTypes(mutationFields.args),
     async resolve(parent, args, req) {
+      /* TO DO
+      - extract the protect (auth and admin) to separate function from "mutation" and "functionQueries"
       //console.log(req.dataloader);
+      */
+
       if (protect && !req.isAuth) error_set("checkisAuth", req.isAuth);
 
       const level = req?.token?.info?.adminlevel;

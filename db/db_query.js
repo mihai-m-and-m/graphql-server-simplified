@@ -4,13 +4,16 @@
 
 const { error_set } = require("../errors/error_logs");
 
+const find_all_in_database = (db_table, db_type = "mangodb") => {
+  //console.log(`function was called for: ${db_table}`);
+  return db_table.find();
+};
+
 const find_in_database = async (db_table, id_value, db_type = "mangodb") => {
   //console.log(`function was called for: ${id_value}`);
-  return await db_table
-    .find({
-      _id: { $in: id_value },
-    })
-    .limit(50);
+  return await db_table.find({
+    _id: { $in: id_value },
+  });
 };
 
 const find_by_id = async (db_table, id_value, db_type = "mangodb") => {
@@ -63,4 +66,5 @@ module.exports = {
   update_in_database,
   find_by_id,
   find_in_database,
+  find_all_in_database,
 };
