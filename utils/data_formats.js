@@ -1,4 +1,4 @@
-/******** FILE FORMAT 
+/******** 
 1. Validate Email address for resolvers
 2. Convert date format
 ********/

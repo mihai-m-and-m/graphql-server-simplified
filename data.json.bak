@@ -106,7 +106,7 @@
     "register": {
       "target": "users",
       "args": { "username": "Str!", "email": "email!", "password": "encrypt!" },
-      "checksF": { "email": "users" },
+      "checksF": { "email__decrypt": "users" },
       "save": { "users": ["save"] }
     },
     "login": {

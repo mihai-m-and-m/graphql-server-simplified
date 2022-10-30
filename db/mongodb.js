@@ -1,6 +1,4 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** MongoDB connection ********/
 
 const { error_set } = require("../errors/error_logs");
 const mongoose = require("mongoose");
@@ -18,4 +16,5 @@ const connectDB = async () => {
     error_set("Database connection failure", err.message);
   }
 };
+
 module.exports = { connectDB };

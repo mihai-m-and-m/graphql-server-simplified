@@ -1,6 +1,4 @@
-/******** FILE FORMAT 
-1. Secure encryption using bcryptjs
-********/
+/******** Secure encryption using bcryptjs ********/
 
 const bcrypt = require("bcryptjs");
 

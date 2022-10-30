@@ -46,20 +46,13 @@ const mutation_resolver = async (mutation, parent, args, req) => {
     for (const check of checksF) {
       let find_field;
       const encrypted_field = check[0].split("__");
-      if (check[0].includes("__")) {
-        find_field = await find_one_in_database(
-          models[check[1]],
-          encrypted_field[0],
-          args[encrypted_field[0]],
-          encrypted_field[0]
-        );
-      } else {
-        find_field = await find_one_in_database(
-          models[check[1]],
-          [check[0]],
-          args[check[0]]
-        );
-      }
+
+      find_field = await find_one_in_database(
+        models[check[1]],
+        encrypted_field[0],
+        args[encrypted_field[0]],
+        encrypted_field[0]
+      );
 
       if (find_field)
         error_set("checkExisting_false", args[encrypted_field[0]]);

@@ -1,4 +1,4 @@
-/******** Create G'QL Types and Nested Fields *******/
+/******** Create GraphQL Types and Nested Fields *******/
 
 const { GraphQLObjectType, GraphQLList, GraphQLNonNull } = require("graphql");
 const { Schemas } = require("../../data.json");
@@ -12,11 +12,12 @@ const {
 } = require("./fieldsTypes");
 
 const schema = Object.entries(Schemas);
+const types = {};
 
 /*********************************************************************
  Assign each schema field "types" and "resolver" for "nested fields"
 *********************************************************************/
-const schemafieldsTypes = (schema) => {
+const schemafieldsTypes = (schema = []) => {
   const schemaName = schema[0];
   const fields = Object.values(schema[1]);
   try {
@@ -61,24 +62,23 @@ const schemafieldsTypes = (schema) => {
  Create GraphQL Types from Schemas
 ***********************************/
 const createType = (schema) => {
+  let schemaName = schema[0];
+  schemaName = new GraphQLObjectType({
+    name: schemaName,
+    fields: () => schemafieldsTypes(schema),
+  });
+  return schemaName;
+};
+
+for (let i = 0; i < schema.length; i++) {
   try {
-    let schemaName = schema[0];
-    schemaName = new GraphQLObjectType({
-      name: schemaName,
-      fields: () => schemafieldsTypes(schema),
-    });
-    return schemaName;
+    types[schema[i][0] + `Type`] = createType(schema[i]);
   } catch (err) {
     error_set("createType", err);
   }
-};
-
-let types = {};
-for (let i = 0; i < schema.length; i++) {
-  types[schema[i][0] + `Type`] = createType(schema[i]);
 }
 
-module.exports = { types, createType };
+module.exports = { types };
 
 /* Create Custom Types in diferent file
 //

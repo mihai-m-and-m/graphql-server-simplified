@@ -3,7 +3,7 @@
     "users": [
       { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
       { "name": "username", "types": "Str", "required": "true" },
-      { "name": "email", "types": "Str", "required": "true", "unique": "true" },
+      { "name": "email", "types": "Str", "required": "true", "unique": "true", "select": "false" },
       { "name": "password", "types": "Str", "required": "true", "select": "false" },
       { "name": "adminlevel", "types": "Int", "required": "true", "default": "0", "select": "false" },
       { "name": "reviewsIDs", "types": "list", "ref": "reviews", "field": "userID" },
@@ -106,7 +106,7 @@
     "register": {
       "target": "users",
       "args": { "username": "Str!", "email": "email!", "password": "encrypt!" },
-      "checksF": { "email": "users" },
+      "checksF": { "email__select": "users" },
       "save": { "users": ["save"] }
     },
     "login": {

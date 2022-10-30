@@ -1,12 +1,13 @@
 /******** FILE FORMAT 
 1. 
 ********/
-
+const { settings } = require("../settings");
 const { error_set } = require("../errors/error_logs");
 
-const find_all_in_database = (db_table, db_fields) => {
-  //console.log(`function was called for: ${db_table}`);
+const db_type = settings.database;
 
+const find_all_in_database = (db_table, db_fields) => {
+  //console.log(`function was called for: ${db_fields}`);
   return db_table.find().select(db_fields);
 };
 
@@ -19,7 +20,7 @@ const find_in_database = async (db_table, id_value, db_fields) => {
     .select(db_fields);
 };
 
-const find_by_id = async (db_table, id_value, db_type = "mangodb") => {
+const find_by_id = async (db_table, id_value) => {
   let result;
   if (id_value.toString().match(/^[0-9a-fA-F]{24}$/))
     result = await db_table.findById(id_value);
@@ -31,8 +32,7 @@ const find_one_in_database = async (
   db_table,
   db_field,
   args_value,
-  encrypted_field = "",
-  db_type = "mangodb"
+  encrypted_field = ""
 ) => {
   let result;
   !encrypted_field
@@ -43,19 +43,13 @@ const find_one_in_database = async (
   return result;
 };
 
-const save_in_database = async (db_table, args_values, db_type = "mangodb") => {
+const save_in_database = async (db_table, args_values) => {
   let result;
   result = await new db_table(args_values).save();
   return result;
 };
 
-const update_in_database = async (
-  db_table,
-  db_field,
-  saved_obj,
-  value,
-  db_type = "mangodb"
-) => {
+const update_in_database = async (db_table, db_field, saved_obj, value) => {
   let result;
   result = await find_by_id(db_table, saved_obj[db_field[0]]._id);
   result[db_field[1]].push(value._id);
