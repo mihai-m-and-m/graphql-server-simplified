@@ -3,11 +3,10 @@
 ********/
 
 const { GraphQLInputObjectType } = require("graphql");
-
 const { Schemas } = require("../../data.json");
 const { setTypes } = require("../types/fieldsTypes");
 
-const keys = Object.keys(Schemas);
+const object = Object.entries(Schemas);
 
 const filterQueryResolvers = (values, items) => {
   values.searchBy && (values = values.searchBy);
@@ -28,10 +27,12 @@ const filterQueryResolvers = (values, items) => {
 const filterFields = (fieldName) => {
   try {
     const field = Object.values(fieldName);
+
     const newObject = Object.assign(
       {},
       ...field.map((item) => {
-        return { [item.name]: { type: setTypes(item.types, "schema") } };
+        if (item.select) return;
+        return { [item.name]: { type: setTypes(item.types) } };
       })
     );
     return newObject;
@@ -53,18 +54,17 @@ const filterFields = (fieldName) => {
 //   user_id: { type: GraphQLString },
 // };
 
-const createFilterInput = (schemaName, filterName) => {
+const createFilterInput = (schema) => {
+  let schemaName = schema[0];
+  const fields = schema[1];
   try {
     schemaName = new GraphQLInputObjectType({
-      name: schemaName + filterName,
-      fields: filterFields(Schemas[schemaName]),
+      name: schemaName + "Search",
+      fields: filterFields(fields),
+      description:
+        "Get specific items which includes parts of one or multiple arguments.",
     });
-    if (filterName === "Filter")
-      schemaName.description =
-        "Get specific items equal to one or multiple arguments. \n\n\n INFO: all fileds of type `ID` can't be used with multiple arguments";
-    if (filterName === "Search")
-      schemaName.description =
-        "Get specific items which includes parts of one or multiple arguments.";
+
     return schemaName;
   } catch (err) {
     console.log(err);
@@ -75,9 +75,10 @@ const createFilterInput = (schemaName, filterName) => {
 const filtersObj = () => {
   try {
     let obj = {};
-    for (let i = 0; i < keys.length; i++) {
-      //obj[keys[i] + `Filter`] = createFilterInput(keys[i], "Filter");
-      obj[keys[i] + `Search`] = createFilterInput(keys[i], "Search");
+
+    for (let i = 0; i < object.length; i++) {
+      if (!object[i][0].includes("__noDB"))
+        obj[object[i][0] + `Search`] = createFilterInput(object[i]);
     }
     return obj;
   } catch (err) {

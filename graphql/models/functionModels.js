@@ -12,7 +12,7 @@ const { Schemas } = require("../../data.json");
 //
 // 1. Check the "Schemas" object from data.json file
 //
-const keys = Object.keys(
+const object = Object.entries(
   Schemas ? Schemas : error_set("noSchema", "Schemas for Models")
 );
 
@@ -34,8 +34,8 @@ const schemaFields = (fieldName) => {
       if (field.types.includes("list")) obj[field.name] = [{ type: name }];
       else obj[field.name] = { type: name };
 
-      field.required && (obj[field.name].required = true);
       field.select && (obj[field.name].select = false);
+      field.required && (obj[field.name].required = true);
       field.unique && (obj[field.name].unique = true);
       field.default && (obj[field.name].default = field.default);
       field.ref && (obj[field.name].ref = field.ref);
@@ -51,51 +51,44 @@ const schemaFields = (fieldName) => {
 //
 // 3. Create Schema for each keys inside the "Schemas" object and save it in an new object
 //
-let allSchemas = {};
-const createSchema = (schemaName, field) => {
+const createSchema = (schemaName, schemaField) => {
   const names = schemaName;
   try {
-    schemaName = new mongoose.Schema(
-      schemaFields(Object.values(Schemas[field])),
-      {
-        timestamps: true,
-      }
-    );
-    allSchemas[`${names}`] = schemaName;
+    schemaName = new mongoose.Schema(schemaFields(schemaField), {
+      timestamps: true,
+    });
     return schemaName;
   } catch (err) {
     error_set("createSchema", err + names);
-  }
-};
-const searchSchemas = () => {
-  try {
-    return allSchemas;
-  } catch (err) {
-    error_set("searchSchemas", allSchemas + err);
   }
 };
 
 //
 // 4. Create the Models using mongoose and save it in a new object
 //
-const createModel = (modelName, schemaName) => {
+const createModel = (modelName, schemaFields) => {
+  const schemaName = `${modelName}Schema`;
   try {
     const model = mongoose.model(
       modelName,
-      createSchema(schemaName, modelName)
+      createSchema(schemaName, schemaFields)
     );
     return model;
   } catch (err) {
     error_set("searchSchemas", modelName + schemaName + err);
   }
 };
+
 let models = {};
-for (let i = 0; i < keys.length; i++) {
-  if (!keys[i].includes("__noDB"))
-    models[keys[i]] = createModel(keys[i], keys[i] + "Schema");
+for (let i = 0; i < object.length; i++) {
+  const modelName = object[i][0];
+  const schemaFields = object[i][1];
+
+  if (!modelName.includes("__noDB"))
+    models[modelName] = createModel(modelName, schemaFields);
 }
 
-module.exports = { models, searchSchemas };
+module.exports = { models };
 
 /******** Create Custom Scheme in diferent file
 const { schemaFields } = require("../models/functionModels");

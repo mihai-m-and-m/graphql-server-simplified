@@ -1,12 +1,17 @@
+const { error_set } = require("./errors/error_logs");
 const dotenv = require("dotenv");
 dotenv.config();
 
 const { settings } = require("./settings");
 
 async function database() {
-  if (settings.database) {
-    const { connectDB } = require("./db/" + settings.database);
-    await connectDB();
+  try {
+    if (settings.database) {
+      const { connectDB } = require("./db/" + settings.database);
+      await connectDB();
+    }
+  } catch (err) {
+    error_set("", err.message);
   }
 }
 
@@ -21,12 +26,16 @@ async function backend() {
 }
 
 const server = async () => {
-  await backend();
-  await database();
-  console.log(
-    `\x1b[32m%s\x1b[0m`,
-    `Welcome to m&m server ~ everything working smooth`
-  );
+  try {
+    await backend();
+    await database();
+    console.log(
+      `\x1b[32m%s\x1b[0m`,
+      `Welcome to m&m server ~ everything working smooth`
+    );
+  } catch (err) {
+    error_set("", err.message);
+  }
 };
 
 server();

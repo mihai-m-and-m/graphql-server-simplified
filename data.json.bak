@@ -3,7 +3,7 @@
     "users": [
       { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
       { "name": "username", "types": "Str", "required": "true" },
-      { "name": "email", "types": "Str", "required": "true", "unique": "true" },
+      { "name": "email", "types": "Str", "required": "true", "unique": "true", "select": "false" },
       { "name": "password", "types": "Str", "required": "true", "select": "false" },
       { "name": "adminlevel", "types": "Int", "required": "true", "default": "0", "select": "false" },
       { "name": "reviewsIDs", "types": "list", "ref": "reviews", "field": "userID" },
@@ -74,7 +74,7 @@
     "getProducts": {
       "types": "list",
       "description": "Get all or a list of orders based on arguments",
-      "args": { "_id": "list", "searchBy": "searchBy", "sortBy": "sortBy" },
+      "args": { "_id": "list", "searchBy": "searchBy" },
       "target": "products"
     },
     "getOrder__auth": {
@@ -95,10 +95,10 @@
       "args": { "_id": "ID", "searchBy": "searchBy" },
       "target": "reviews"
     },
-    "getReviews": {
+    "getReviews__adminlevel__1": {
       "types": "list",
       "description": "Get all or a list of reviews based on arguments",
-      "args": { "_id": "list", "users_id": "ID", "searchBy": "searchBy" },
+      "args": { "id": "list", "searchBy": "searchBy", "sortBy": "sortBy"  },
       "target": "reviews"
     }
   },

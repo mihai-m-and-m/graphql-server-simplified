@@ -6,8 +6,9 @@ Second step change the next settings as you wish.
 */
 
 const settings = {
-  database: "mangodb", // mangodb or TODO mysql
+  database: "mangodb", // mongodb or TODO mysql
   backend: "graphql", // graphql API or TODO REST API
+  timeStamp: true, // only avalaible for mongodb
 };
 
 module.exports = { settings };

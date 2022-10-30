@@ -1,70 +1,71 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** Create G'QL Types and Nested Fields *******/
 
-const {
-  GraphQLObjectType,
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLInt,
-  GraphQLString,
-} = require("graphql");
+const { GraphQLObjectType, GraphQLList, GraphQLNonNull } = require("graphql");
 const { Schemas } = require("../../data.json");
+const { settings } = require("../../settings");
 const { nestedQueryResolvers } = require("../resolvers/resolversQueries");
 const { error_set } = require("../../errors/error_logs");
-const { setTypes } = require("./fieldsTypes");
+const {
+  setTypes,
+  setTimeStamp,
+  setPaginationFields,
+} = require("./fieldsTypes");
 
-let object = Object.entries(Schemas);
+const schema = Object.entries(Schemas);
 
-const objectTypes = (schemaName) => {
+/*********************************************************************
+ Assign each schema field "types" and "resolver" for "nested fields"
+*********************************************************************/
+const schemafieldsTypes = (schema) => {
+  const schemaName = schema[0];
+  const fields = Object.values(schema[1]);
   try {
-    const TypesFields = Object.values(schemaName);
-    const newObject = Object.assign(
+    let field = Object.assign(
       {},
-      ...TypesFields.map((item) => {
+      ...fields.map((field) => {
         let result = {};
-        if (item.ref) {
-          if (item.types.includes("list")) {
-            result.type = new GraphQLList(types[`${item.ref}Type`]);
-            result.args = { first: { type: GraphQLInt } };
-          }
+        if (field.select) return;
 
-          item.types.includes("single") &&
-            (result.type = types[`${item.ref}Type`]);
+        if (!field.ref) result.type = setTypes(field.types);
 
-          result = {
-            ...result,
-            resolve(parent, args, info) {
-              return nestedQueryResolvers(parent, args, info, item);
-            },
-          };
-        } else {
-          result.type = setTypes(item.types);
-          if (item.required && !item.select)
-            result.type = new GraphQLNonNull(result.type);
+        if (field.types.includes("list")) {
+          result.type = new GraphQLList(types[`${field.ref}Type`]);
+          result.args = setPaginationFields();
         }
-        return { [item.name]: result };
+
+        if (field.types.includes("single"))
+          result.type = types[`${field.ref}Type`];
+
+        if (field.required && !field.select)
+          result.type = new GraphQLNonNull(result.type);
+
+        if (field.ref)
+          result.resolve = (parent, args, context, info) => {
+            return nestedQueryResolvers(parent, args, context, info, field);
+          };
+
+        return { [field.name]: result };
       })
     );
-    if (!`${schemaName}`.includes("_noDB", -1)) {
-      newObject.createdAt = { type: new GraphQLNonNull(GraphQLString) };
-      newObject.updatedAt = { type: new GraphQLNonNull(GraphQLString) };
-    }
-    //console.log(newObject);
-    return newObject;
+
+    if (!schemaName.includes("__noDB", -1) && settings.timeStamp)
+      field = { ...field, ...setTimeStamp() };
+
+    return field;
   } catch (err) {
     error_set("objectTypes", schemaName + err);
   }
 };
 
+/**********************************
+ Create GraphQL Types from Schemas
+***********************************/
 const createType = (schema) => {
   try {
     let schemaName = schema[0];
-    let schemaFields = schema[1];
-
     schemaName = new GraphQLObjectType({
       name: schemaName,
-      fields: () => objectTypes(schemaFields),
+      fields: () => schemafieldsTypes(schema),
     });
     return schemaName;
   } catch (err) {
@@ -73,11 +74,11 @@ const createType = (schema) => {
 };
 
 let types = {};
-for (let i = 0; i < object.length; i++) {
-  types[object[i][0] + `Type`] = createType(object[i]);
+for (let i = 0; i < schema.length; i++) {
+  types[schema[i][0] + `Type`] = createType(schema[i]);
 }
 
-module.exports = { types, createType, objectTypes };
+module.exports = { types, createType };
 
 /* Create Custom Types in diferent file
 //

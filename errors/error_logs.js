@@ -43,7 +43,7 @@ const error_set = (text, args) => {
       text = "Higher admin access required: level " + args;
       break;
     default:
-      text = "There was a problem, still need to implement error message";
+      text = "There was a problem: " + text;
   }
   const arrow = " ===>>>  ";
   console.log(`${color}%s\x1b[0m`, text + arrow + args);

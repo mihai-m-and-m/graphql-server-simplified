@@ -18,8 +18,8 @@ const ENDPOINT = process.env.GRAPHQL_ENDPOINT || "/graphql";
 
 server.use(cors());
 server.use(express.json());
-server.use(auth);
 
+server.use(auth);
 server.use(obj_loader);
 
 server.use(

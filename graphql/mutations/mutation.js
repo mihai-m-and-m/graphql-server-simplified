@@ -7,6 +7,10 @@ const { types } = require("../types/functionTypes");
 const { Mutations } = require("../../data.json");
 const { setArgsTypes } = require("../types/fieldsTypes");
 const { mutation_resolver } = require("./resolversMutations");
+const {
+  protectQueryAndMutations,
+  protectQueryAndMutationsFields,
+} = require("../../middleware/authMiddleware");
 
 const getAllMutations = Object.entries(Mutations);
 let setAllMutations = {};
@@ -14,34 +18,15 @@ let setAllMutations = {};
 for (const mutation of getAllMutations) {
   const mutationFields = mutation[1];
   let mutationName = mutation[0];
-  let protect;
 
-  if (mutationName.includes("__")) {
-    mutationName = mutationName.split("__");
-    if (
-      mutationName[1].includes("auth") ||
-      mutationName[1].includes("adminlevel")
-    ) {
-      protect = mutationName;
-    }
-    mutationName = mutationName[0];
-  }
+  const protect = protectQueryAndMutationsFields(mutationName);
+  protect && (mutationName = protect[0]);
 
   setAllMutations[mutationName] = {
     type: types[`${mutationFields.target}Type`],
     args: setArgsTypes(mutationFields.args),
     async resolve(parent, args, req) {
-      /* TO DO
-      - extract the protect (auth and admin) to separate function from "mutation" and "functionQueries"
-      //console.log(req.dataloader);
-      */
-
-      if (protect && !req.isAuth) error_set("checkisAuth", req.isAuth);
-
-      const level = req?.token?.info?.adminlevel;
-      if (protect && protect[2] && level >= 0 && !(level >= protect[2]))
-        error_set("checkisAdmin", protect[2]);
-
+      protectQueryAndMutations(protect, req);
       return mutation_resolver(mutationFields, parent, args, req);
     },
   };

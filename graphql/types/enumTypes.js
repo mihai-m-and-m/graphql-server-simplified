@@ -28,3 +28,7 @@ const sort = new GraphQLEnumType({
     },
   },
 });
+
+const enumTypes = { sort };
+
+module.exports = { enumTypes };

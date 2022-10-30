@@ -13,6 +13,10 @@ const {
 } = require("graphql");
 const { error_set, errors_logs } = require("../../errors/error_logs");
 
+/****************************************************************************************
+ Configure types for fields inside filters (searchBy, sortBy)
+ Configure types for arguments of mutations fields used by below "setArgsTypes" function 
+*****************************************************************************************/
 const setTypes = (fieldType) => {
   let type;
   const stringType = ["Str", "email", "encrypt", "jwt"];
@@ -29,15 +33,37 @@ const setTypes = (fieldType) => {
   return type;
 };
 
+/******************************************************************
+ Configure Time Stamp for each field of the Schema
+*******************************************************************/
+const setTimeStamp = () => {
+  let field = {};
+  field.createdAt = { type: new GraphQLNonNull(GraphQLString) };
+  field.updatedAt = { type: new GraphQLNonNull(GraphQLString) };
+  return field;
+};
+
+/******************************************************************
+ Configure nested query fields for pagination only for "list" type
+ Start: number to start from
+ End: end number of list items
+*******************************************************************/
+const setPaginationFields = () => {
+  return { start: { type: GraphQLInt }, end: { type: GraphQLInt } };
+};
+
+/**************************************************
+ Configure types for arguments of mutations fields 
+ Configure types for arguments of query fields 
+***************************************************/
 const setArgsTypes = (object, target = "") => {
   const types = Object.entries(object);
-
   let obj = {};
+
   try {
     for (const type of types) {
       obj[type[0]] = (type[0], { type: setTypes(type[1]) });
     }
-
     return obj;
   } catch (err) {
     errors_logs(err);
@@ -46,4 +72,4 @@ const setArgsTypes = (object, target = "") => {
   }
 };
 
-module.exports = { setTypes, setArgsTypes };
+module.exports = { setTypes, setArgsTypes, setTimeStamp, setPaginationFields };
