@@ -54,18 +54,20 @@ const setPaginationFields = () => {
  Configure types for arguments of mutations fields 
  Configure types for arguments of query fields 
 ***************************************************/
-const setArgsTypes = (object, target = "") => {
+const setArgsTypes = (object) => {
   const types = Object.entries(object);
   let obj = {};
 
   try {
     for (const type of types) {
-      obj[type[0]] = (type[0], { type: setTypes(type[1]) });
+      const argName = type[0];
+      const argType = type[1];
+      obj[argName] = (argName, { type: setTypes(argType) });
     }
     return obj;
   } catch (err) {
     errors_logs(err);
-    error_set("setFieldsTypes", object + target + err);
+    error_set("setFieldsTypes", object + err.message);
     throw err;
   }
 };

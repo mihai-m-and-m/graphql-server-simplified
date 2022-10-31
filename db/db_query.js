@@ -1,18 +1,17 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** Database queries ********/
+
 const { settings } = require("../settings");
 const { error_set } = require("../errors/error_logs");
 
 const db_type = settings.database;
 
 const find_all_in_database = (db_table, db_fields) => {
-  //console.log(`function was called for: ${db_fields}`);
+  // console.log(`function was called for: ${db_fields}`);
   return db_table.find().select(db_fields);
 };
 
 const find_in_database = async (db_table, id_value, db_fields) => {
-  //console.log(`function was called for ${db_fields}`);
+  // console.log(`function was called for ${db_fields}`);
   return await db_table
     .find({
       _id: { $in: id_value },

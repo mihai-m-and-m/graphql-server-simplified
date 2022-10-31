@@ -1,4 +1,4 @@
-/******** Generate Query based on data.json file ********/
+/******** Generate Query based on provided Queries object ********/
 
 const { GraphQLList, GraphQLNonNull } = require("graphql");
 const { Queries } = require("../../data.json");
@@ -19,72 +19,51 @@ const queries = Object.entries(Queries);
  Assign each field values and resolver for each key inside Query
 *****************************************************************/
 const setQueriesFields = (fieldName, protect) => {
-  try {
-    fieldName.types === "list" &&
-      (fieldName.type = new GraphQLNonNull(
-        new GraphQLList(types[`${fieldName.target}Type`])
-      ));
+  fieldName.types === "list" &&
+    (fieldName.type = new GraphQLNonNull(
+      new GraphQLList(types[`${fieldName.target}Type`])
+    ));
 
-    fieldName.types === "single" &&
-      (fieldName.type = types[`${fieldName.target}Type`]);
+  fieldName.types === "single" &&
+    (fieldName.type = types[`${fieldName.target}Type`]);
 
-    fieldName.resolve = async (parent, args, context, info) => {
-      protectQueryAndMutations(protect, context);
-      return queriesResolvers(parent, args, context, info, fieldName);
-    };
+  fieldName.args &&
+    (fieldName.args = setArgsTypes(fieldName.args, fieldName.target));
 
-    fieldName.args &&
-      (fieldName.args = setArgsTypes(fieldName.args, fieldName.target));
+  fieldName.args.searchBy &&
+    (fieldName.args.searchBy.type = filters[`${fieldName.target}Search`]);
 
-    fieldName.args.searchBy &&
-      (fieldName.args.searchBy.type = filters[`${fieldName.target}Search`]);
+  fieldName.args.sortBy && (fieldName.args.sortBy.type = enumTypes.sort);
 
-    fieldName.args.sortBy && (fieldName.args.sortBy.type = enumTypes.sort);
+  fieldName.resolve = async (parent, args, context, info) => {
+    protectQueryAndMutations(protect, context);
+    return queriesResolvers(parent, args, context, info, fieldName);
+  };
 
-    const field = { type: fieldName.type };
-    fieldName.description && (field.description = fieldName.description);
-    fieldName.args && (field.args = fieldName.args);
-    fieldName.resolve && (field.resolve = fieldName.resolve);
+  const field = { type: fieldName.type };
+  fieldName.description && (field.description = fieldName.description);
+  fieldName.args && (field.args = fieldName.args);
+  fieldName.resolve && (field.resolve = fieldName.resolve);
 
-    return field;
-  } catch (err) {
-    error_set("setQueriesFields", fieldName + err);
-  }
+  return field;
 };
 
 /*****************************************************************
- Generate all the Query's based on data.json file
+ Generate all the Query's based on provided Queries object
 *****************************************************************/
-const createQuerys = () => {
+let Query = {};
+for (let i = 0; i < queries.length; i++) {
+  let queryName = queries[i][0];
+  const queryValues = queries[i][1];
   try {
-    let obj = {};
-    for (let i = 0; i < queries.length; i++) {
-      let queryName = queries[i][0];
-      const queryValues = queries[i][1];
+    const protect = protectQueryAndMutationsFields(queryName);
+    protect && (queryName = protect[0]);
 
-      const protect = protectQueryAndMutationsFields(queryName);
-      protect && (queryName = protect[0]);
-
-      obj[queryName] = setQueriesFields(queryValues, protect);
-    }
-    return obj;
+    Query[queryName] = setQueriesFields(queryValues, protect);
   } catch (err) {
-    error_set("createQuerys", queries + err);
+    errors_logs(err);
+    error_set("Queries", queryName + queryValues.name + err.message);
   }
-};
-const Query = createQuerys();
+}
 
-module.exports = { Query, setQueriesFields };
-
-/* example
-
-const getUser = {
-  type: UserType,
-  description: "Get one user",
-  args: { id: { type: GraphQLString } },
-  resolve(parent, args) {
-    return User.findById(args.id);
-  },
-};
-
-*/
+module.exports = { Query };

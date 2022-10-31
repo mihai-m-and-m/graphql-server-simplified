@@ -1,6 +1,4 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** MYSQL DATABASE CONNECTION ********/
 
 const mysql = require("mysql2");
 

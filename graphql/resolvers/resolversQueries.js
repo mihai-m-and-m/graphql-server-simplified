@@ -1,6 +1,4 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** Queries resolvers ********/
 
 const { models } = require("../functions/functionModels");
 const { filterQueryResolvers } = require("../types/filtersTypes");
@@ -8,6 +6,9 @@ const { error_set } = require("../../errors/error_logs");
 const { date } = require("../../utils/data_formats");
 const { find_all_in_database } = require("../../db/db_query");
 
+/***********************************************************
+ Select "fieldNodes" from query (selected fields to query DB)
+ ***********************************************************/
 const getQuerySelections = ({ fieldNodes }) => {
   return fieldNodes
     .map((node) => node.selectionSet.selections)
@@ -16,11 +17,11 @@ const getQuerySelections = ({ fieldNodes }) => {
     .join(" ");
 };
 
+/****************************************************************
+ Query resolvers for nested fields with DataLoader for perfomarce
+ ****************************************************************/
 const nestedQueryResolvers = async (parent, args, context, info, item) => {
   try {
-    /* TO DO
-      - extract the fields required from ctx to specify what to load and dont load twice
-      */
     const ids = parent[item.name];
     const load = { ids, selection: getQuerySelections(info) };
     const loaderName = item.ref + `_` + item.field + `_Loader`;
@@ -39,34 +40,33 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
     if (item.types === "single") return result.ids;
     return result[0].map((i) => i.ids);
   } catch (err) {
-    error_set("nestedQueryResolvers", item.name + err);
+    errors_logs(err);
+    error_set("nestedQueryResolvers", item.name + err.message);
   }
 };
 
+/****************************************************************
+ Main Query resolvers fields with DataLoader for perfomarce
+ ****************************************************************/
 const queriesResolvers = async (parent, args, context, info, fieldName) => {
   try {
-    /* TO DO
-      - extract the fields required from ctx to specify what to load and dont load twice
-      console.log(ctx.dataloader);
-      - based on info param choose only the required fields
-      */
     const selection = getQuerySelections(info);
     let items = await find_all_in_database(models[fieldName.target], selection);
     items = filterQueryResolvers(args, items);
 
-    // return {
-    //   ...item._doc,
-    //   _id: item.id,
-    //   createdAt: date(item._doc.createdAt),
-    //   updatedAt: date(item._doc.updatedAt),
-    // };
+    let result = items.map((item) => {
+      if (selection.includes("createdAt"))
+        return { ...item._doc, createdAt: date(item.createdAt) };
+      if (selection.includes("updatedAt"))
+        return { ...item._doc, updatedAt: date(item.updatedAt) };
+      return item._doc;
+    });
 
-    const result = items.map((item) => item);
-    console.log(result[0].createdAt);
     if (fieldName.types === "list") return result;
     else if (fieldName.types === "single") return result[0];
   } catch (err) {
-    error_set("queriesResolvers", fieldName + err);
+    errors_logs(err);
+    error_set("queriesResolvers", fieldName + err.message);
   }
 };
 

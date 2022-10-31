@@ -1,6 +1,4 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** Mutations resolvers ********/
 
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../../utils/jsonwebtoken");
@@ -16,6 +14,10 @@ const {
   find_by_id,
 } = require("../../db/db_query");
 
+/*********************************************************************
+ Assign for each Mutation resolver (Arguments, Checks True(if exists),
+ Checks False(if not in DB), Savings, Returns, etc...) 
+*********************************************************************/
 const mutation_resolver = async (mutation, parent, args, req) => {
   const checksT = mutation.checksT ? mutation.checksT : [];
   const checksF = mutation.checksF ? Object.entries(mutation.checksF) : [];
@@ -28,7 +30,6 @@ const mutation_resolver = async (mutation, parent, args, req) => {
   let JWT_fields = {};
   let result = {};
 
-  let error;
   try {
     for (const arg of arguments) {
       if (arg[1].includes("email") && !args[arg[0]].match(validEmail()))
@@ -145,7 +146,7 @@ const mutation_resolver = async (mutation, parent, args, req) => {
     return returned_obj;
   } catch (err) {
     errors_logs(err);
-    throw err;
+    error_set("resolversMutations", err.message);
   }
 };
 

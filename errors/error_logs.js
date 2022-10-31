@@ -1,6 +1,4 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** Error handling ********/
 
 const errors_logs = (err) => {
   //console.log(err);
@@ -9,24 +7,37 @@ const errors_logs = (err) => {
 const error_set = (text, args) => {
   const color = "\x1b[31m";
   switch (text) {
-    case "noSchema":
-      text = 'THERE IS MISSING object with name "Schemas" from data.json ';
+    case "ModelSchemas":
+      text = "Invalid Models inside 'functionModels' file ";
       break;
-    case "noSchemaItem":
-      text = 'THERE IS MISSING FROM "Schemas" the keys names from data.json ';
+    case "DataLoader":
+      text = "Invalid DataLoader inside 'functionDataLoader' file ";
       break;
-    case "noSchemaItemFields":
-      text =
-        'THERE IS MISSING FROM "Schemas" the values of one key names from data.json ';
+    case "Mutations":
+      text = "Invalid Mutation inside 'functionMutations' file ";
       break;
-    case "getAllQueries":
-      text =
-        'THERE IS MISSING FROM "setQueries" the keys names from data.json ';
+    case "Queries":
+      text = "Invalid Mutation inside 'functionQueries' file ";
       break;
-    case "getQueriesList":
-      text =
-        'THERE IS MISSING FROM a field from "setQueries" the values from data.json ';
+    case "createType":
+      text = "Invalid Types inside 'functionTypes' file ";
       break;
+    case "resolversMutations":
+      text = "Invalid Mutation inside 'resolversMutations' file ";
+      break;
+    case "nestedQueryResolvers":
+      text = "Error for nested field in 'resolverQueries' file ";
+      break;
+    case "queriesResolvers":
+      text = "Error for Query resolver in 'resolverQueries' file ";
+      break;
+    case "setFieldsTypes":
+      text = "Error set arguments types in 'fieldsTypes' file ";
+      break;
+    case "createFilterInput":
+      text = "Error creating Filter Input in 'filtersTypes' file ";
+      break;
+
     case "checkExisting_false":
       text = "Exists already - " + args;
       break;
@@ -49,12 +60,5 @@ const error_set = (text, args) => {
   console.log(`${color}%s\x1b[0m`, text + arrow + args);
   throw new Error(text);
 };
-
-//// TO DO:
-//// setFieldsTypes, setQueriesFields, createQuerys - from functionQueries
-
-/// objectTypes, createType  - from functionTypes
-
-/// nestedQueryResolvers, queriesResolvers, loadersQueries  - from resolversQueries
 
 module.exports = { error_set, errors_logs };
