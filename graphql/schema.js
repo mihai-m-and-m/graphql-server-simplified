@@ -1,10 +1,8 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** Define Query and Mutations ********/
 
 const { GraphQLSchema, GraphQLObjectType } = require("graphql");
-const { Query } = require("../queries/functionQueries");
-const { setAllMutations } = require("../mutations/mutation");
+const { Query } = require("./functions/functionQueries");
+const { setAllMutations } = require("./functions/FunctionMutations");
 
 // Define QueryType
 const Queries = new GraphQLObjectType({

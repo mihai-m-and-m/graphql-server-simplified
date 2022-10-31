@@ -1,10 +1,8 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** Define Filters ********/
 
 const { GraphQLInputObjectType } = require("graphql");
 const { Schemas } = require("../../data.json");
-const { setTypes } = require("../types/fieldsTypes");
+const { setTypes } = require("./fieldsTypes");
 
 const object = Object.entries(Schemas);
 

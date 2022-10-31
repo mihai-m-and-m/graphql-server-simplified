@@ -2,8 +2,8 @@
 1. 
 ********/
 
-const { models } = require("../models/functionModels");
-const { filterQueryResolvers } = require("../filters/filters");
+const { models } = require("../functions/functionModels");
+const { filterQueryResolvers } = require("../types/filtersTypes");
 const { error_set } = require("../../errors/error_logs");
 const { date } = require("../../utils/data_formats");
 const { find_all_in_database } = require("../../db/db_query");

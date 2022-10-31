@@ -9,7 +9,7 @@ const {
   setTypes,
   setTimeStamp,
   setPaginationFields,
-} = require("./fieldsTypes");
+} = require("../types/fieldsTypes");
 
 const schema = Object.entries(Schemas);
 const types = {};

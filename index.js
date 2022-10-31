@@ -1,8 +1,9 @@
-const { error_set } = require("./errors/error_logs");
-const dotenv = require("dotenv");
-dotenv.config();
+/******** Set Connections to database and start Backend Server ********/
 
+const dotenv = require("dotenv");
 const { settings } = require("./settings");
+const { error_set } = require("./errors/error_logs");
+dotenv.config();
 
 async function database() {
   try {
@@ -18,7 +19,7 @@ async function database() {
 async function backend() {
   let api_server;
   if (settings.backend === "graphql") {
-    api_server = require("./graphql/graphql");
+    api_server = require("./graphql/server");
   }
   if (settings.backend === "rest-api") {
     api_server = require("./rest-api/restful");

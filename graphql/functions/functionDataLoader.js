@@ -1,9 +1,7 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** DataLoader for batching on each request ********/
 
 const DataLoader = require("dataloader");
-const { models } = require("../models/functionModels");
+const { models } = require("./functionModels");
 const { find_in_database } = require("../../db/db_query");
 const { Schemas } = require("../../data.json");
 

@@ -3,10 +3,10 @@
 ********/
 
 const { error_set } = require("../../errors/error_logs");
-const { types } = require("../types/functionTypes");
+const { types } = require("./functionTypes");
 const { Mutations } = require("../../data.json");
 const { setArgsTypes } = require("../types/fieldsTypes");
-const { mutation_resolver } = require("./resolversMutations");
+const { mutation_resolver } = require("../resolvers/resolversMutations");
 const {
   protectQueryAndMutations,
   protectQueryAndMutationsFields,

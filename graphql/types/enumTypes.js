@@ -1,6 +1,4 @@
-/******** FILE FORMAT 
-1. TODO
-********/
+/******** Define EnumType ********/
 
 const {
   GraphQLEnumType,
@@ -12,10 +10,9 @@ const {
   GraphQLFloat,
   GraphQLList,
 } = require("graphql");
-const types = require("../types/functionTypes");
-const { searchSchemas, getSchemas } = require("../models/functionModels");
 
-const { fieldsTypes } = require("../types/functionTypes");
+const { searchSchemas, getSchemas } = require("../functions/functionModels");
+const { fieldsTypes, types } = require("../functions/functionTypes");
 
 const sort = new GraphQLEnumType({
   name: "Sort",

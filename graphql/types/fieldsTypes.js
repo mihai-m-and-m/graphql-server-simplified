@@ -1,6 +1,4 @@
-/******** FILE FORMAT 
-1. 
-********/
+/******** Define all the Types for API ********/
 
 const {
   GraphQLString,

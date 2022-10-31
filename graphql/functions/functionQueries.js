@@ -2,8 +2,8 @@
 
 const { GraphQLList, GraphQLNonNull } = require("graphql");
 const { Queries } = require("../../data.json");
-const { types } = require("../types/functionTypes");
-const { filters } = require("../filters/filters");
+const { types } = require("./functionTypes");
+const { filters } = require("../types/filtersTypes");
 const { enumTypes } = require("../types/enumTypes");
 const { queriesResolvers } = require("../resolvers/resolversQueries");
 const { setArgsTypes } = require("../types/fieldsTypes");

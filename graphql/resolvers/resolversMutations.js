@@ -8,7 +8,7 @@ const { encrypt } = require("../../utils/encrypt");
 const { date, validEmail } = require("../../utils/data_formats");
 const { error_set, errors_logs } = require("../../errors/error_logs");
 
-const { models } = require("../models/functionModels");
+const { models } = require("../functions/functionModels");
 const {
   find_one_in_database,
   save_in_database,
