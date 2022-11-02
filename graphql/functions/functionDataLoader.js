@@ -3,9 +3,8 @@
 const DataLoader = require("dataloader");
 const { find_in_database } = require("../../db/db_query");
 const { models } = require("./functionModels");
-const { Schemas } = require("../../data.json");
-
-const loaderFields = Object.entries(Schemas);
+const { getAllSchemas } = require("../../data");
+const { errors_logs, error_set } = require("../../errors/error_logs");
 
 /******************************************************************************
  Batch all Ids and selected fields from Query and sort them after DB response
@@ -38,7 +37,7 @@ const batchIdsAndSelections = async (idsAndSelections, field) => {
 *******************************************************************/
 const obj_loader = (req, res, next) => {
   const obj = {};
-  for (const tables of loaderFields) {
+  for (const tables of getAllSchemas) {
     for (const fields of tables[1]) {
       const loaderName = fields.ref + `_` + fields.field + `_Loader`;
       if (fields.field && !obj[loaderName]) {

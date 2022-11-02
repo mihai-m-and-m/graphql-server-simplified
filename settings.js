@@ -6,6 +6,7 @@ Second step change the next settings as you wish.
 */
 
 const settings = {
+  data: "./data.json", // File location to define all Schema/Query/Mutation
   database: "mongodb", // mongodb or TODO mysql
   backend: "graphql", // graphql API or TODO REST API
   timeStamp: true, // only avalaible for mongodb

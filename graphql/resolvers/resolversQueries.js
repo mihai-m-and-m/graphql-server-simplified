@@ -2,7 +2,7 @@
 
 const { models } = require("../functions/functionModels");
 const { filterQueryResolvers } = require("../types/filtersTypes");
-const { error_set } = require("../../errors/error_logs");
+const { error_set, errors_logs } = require("../../errors/error_logs");
 const { date } = require("../../utils/data_formats");
 const { find_all_in_database } = require("../../db/db_query");
 

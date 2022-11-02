@@ -1,19 +1,17 @@
 /******** Generate Query based on provided Queries object ********/
 
 const { GraphQLList, GraphQLNonNull } = require("graphql");
-const { Queries } = require("../../data.json");
+const { getAllQueries } = require("../../data");
 const { types } = require("./functionTypes");
 const { filters } = require("../types/filtersTypes");
 const { enumTypes } = require("../types/enumTypes");
 const { queriesResolvers } = require("../resolvers/resolversQueries");
 const { setArgsTypes } = require("../types/fieldsTypes");
-const { error_set } = require("../../errors/error_logs");
+const { error_set, errors_logs } = require("../../errors/error_logs");
 const {
   protectQueryAndMutations,
   protectQueryAndMutationsFields,
 } = require("../../middleware/authMiddleware");
-
-const queries = Object.entries(Queries);
 
 /*****************************************************************
  Assign each field values and resolver for each key inside Query
@@ -52,9 +50,9 @@ const setQueriesFields = (fieldName, protect) => {
  Generate all the Query's based on provided Queries object
 *****************************************************************/
 let Query = {};
-for (let i = 0; i < queries.length; i++) {
-  let queryName = queries[i][0];
-  const queryValues = queries[i][1];
+for (let i = 0; i < getAllQueries.length; i++) {
+  let queryName = getAllQueries[i][0];
+  const queryValues = getAllQueries[i][1];
   try {
     const protect = protectQueryAndMutationsFields(queryName);
     protect && (queryName = protect[0]);

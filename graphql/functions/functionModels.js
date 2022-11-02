@@ -2,10 +2,8 @@
 
 const mongoose = require("mongoose");
 const { error_set, errors_logs } = require("../../errors/error_logs");
-const { Schemas } = require("../../data.json");
+const { getAllSchemas } = require("../../data");
 const { settings } = require("../../settings");
-
-const object = Object.entries(Schemas);
 
 /******************************************************************************
  Assign "type" and options for each field from each key inside "Schema" object
@@ -50,9 +48,9 @@ const createModel = (modelName, fields) => {
 };
 
 let models = {};
-for (let i = 0; i < object.length; i++) {
-  const modelName = object[i][0];
-  const schemaFields = object[i][1];
+for (let i = 0; i < getAllSchemas.length; i++) {
+  const modelName = getAllSchemas[i][0];
+  const schemaFields = getAllSchemas[i][1];
   if (!modelName.includes("__noDB"))
     models[modelName] = createModel(modelName, schemaFields);
 }

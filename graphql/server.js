@@ -7,8 +7,8 @@ const depthLimit = require("graphql-depth-limit");
 const { obj_loader } = require("./functions/functionDataLoader");
 const { auth } = require("../middleware/authMiddleware");
 const { settings } = require("../settings");
+const { graphQLSchema } = require("./schema");
 const server = express();
-const schema = require("./schema");
 
 const PORT = process.env.SERVER_PORT || 3000;
 const ENDPOINT = process.env.GRAPHQL_ENDPOINT || "/graphql";
@@ -21,7 +21,7 @@ server.use(obj_loader);
 server.use(
   ENDPOINT,
   graphqlHTTP({
-    schema: schema,
+    schema: graphQLSchema,
     graphiql: settings.graphiql,
     validationRules: [depthLimit(settings.graphqlDepthLimit)],
   })

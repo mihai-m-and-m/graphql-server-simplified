@@ -1,7 +1,7 @@
 /******** Create GraphQL Types and Nested Fields *******/
 
 const { GraphQLObjectType, GraphQLList, GraphQLNonNull } = require("graphql");
-const { Schemas } = require("../../data.json");
+const { getAllSchemas } = require("../../data");
 const { settings } = require("../../settings");
 const { nestedQueryResolvers } = require("../resolvers/resolversQueries");
 const { error_set, errors_logs } = require("../../errors/error_logs");
@@ -10,8 +10,6 @@ const {
   setTimeStamp,
   setPaginationFields,
 } = require("../types/fieldsTypes");
-
-const schema = Object.entries(Schemas);
 
 /*********************************************************************
  Assign each schema field "types" and "resolver" for "nested fields"
@@ -60,9 +58,9 @@ const createType = (schema) => {
   return schemaName;
 };
 
-for (let i = 0; i < schema.length; i++) {
+for (let i = 0; i < getAllSchemas.length; i++) {
   try {
-    types[schema[i][0] + `Type`] = createType(schema[i]);
+    types[getAllSchemas[i][0] + `Type`] = createType(getAllSchemas[i]);
   } catch (err) {
     errors_logs(err);
     error_set("createType", err.message);

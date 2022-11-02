@@ -1,10 +1,9 @@
 /******** Define Filters ********/
 
 const { GraphQLInputObjectType } = require("graphql");
-const { Schemas } = require("../../data.json");
+const { getAllSchemas } = require("../../data");
+const { errors_logs, error_set } = require("../../errors/error_logs");
 const { setTypes } = require("./fieldsTypes");
-
-const object = Object.entries(Schemas);
 
 /* TODO 
   q: { type: GraphQLString },  --------- quantity
@@ -69,9 +68,11 @@ const createFilterInput = (schema) => {
 };
 
 let filters = {};
-for (let i = 0; i < object.length; i++) {
-  if (!object[i][0].includes("__noDB"))
-    filters[object[i][0] + `Search`] = createFilterInput(object[i]);
+for (let i = 0; i < getAllSchemas.length; i++) {
+  if (!getAllSchemas[i][0].includes("__noDB"))
+    filters[getAllSchemas[i][0] + `Search`] = createFilterInput(
+      getAllSchemas[i]
+    );
 }
 
 module.exports = { filters, filterQueryResolvers, filterFields };
