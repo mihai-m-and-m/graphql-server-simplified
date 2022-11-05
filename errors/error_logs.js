@@ -5,7 +5,6 @@ const errors_logs = (err) => {
 };
 
 const error_set = (text, args) => {
-  console.log(text);
   const color = "\x1b[31m";
   switch (text) {
     case "ModelSchemas":

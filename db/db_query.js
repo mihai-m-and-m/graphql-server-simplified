@@ -10,6 +10,18 @@ const find_all_in_database = (db_table, db_fields) => {
   return db_table.find().select(db_fields);
 };
 
+const find_args_database = async (db_table, args, db_fields, subfields) => {
+  const values = args.map((value) => {
+    if (typeof value[1] === "string") {
+      if (subfields[value[0]].type.name === "ID")
+        return { [value[0]]: value[1] };
+      return { [value[0]]: { $regex: value[1].toString().toLowerCase() } };
+    } else return { [value[0]]: value[1] };
+  });
+
+  return await db_table.find({ $and: values }).select(db_fields);
+};
+
 const find_in_database = async (db_table, id_value, db_fields) => {
   // console.log(`function was called for ${db_fields}`);
   return await db_table
@@ -44,7 +56,7 @@ const find_one_in_database = async (
 
 const save_in_database = async (db_table, args_values) => {
   let result;
-  result = await new db_table(args_values).save();
+  result = await new db_table(args_values.toString().toLowerCase()).save();
   return result;
 };
 
@@ -63,4 +75,5 @@ module.exports = {
   find_by_id,
   find_in_database,
   find_all_in_database,
+  find_args_database,
 };

@@ -4,11 +4,11 @@ const { types } = require("./functionTypes");
 const { getAllMutations } = require("../../data");
 const { setArgsTypes } = require("../types/fieldsTypes");
 const { mutation_resolver } = require("../resolvers/resolversMutations");
+const { errors_logs, error_set } = require("../../errors/error_logs");
 const {
   protectQueryAndMutations,
   protectQueryAndMutationsFields,
 } = require("../../middleware/authMiddleware");
-const { errors_logs, error_set } = require("../../errors/error_logs");
 
 /***********************************************************
  Assign and protect each mutation field values and resolvers

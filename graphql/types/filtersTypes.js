@@ -19,24 +19,6 @@ const { setTypes } = require("./fieldsTypes");
 /***********************************************************
  Filter Query result based on provided filters in arguments
  ***********************************************************/
-const filterQueryResolvers = (values, items) => {
-  values.searchBy && (values = values.searchBy);
-  Object.keys(values).forEach((key) => {
-    items = items.filter(
-      (d) =>
-        d[key] &&
-        d[key]
-          .toString()
-          .toLowerCase()
-          .includes(values[key].toString().toLowerCase())
-    );
-  });
-  return items;
-};
-
-/***********************************************************
- Filter Query result based on provided filters in arguments
- ***********************************************************/
 const filterFields = (fieldName) => {
   const field = Object.values(fieldName);
   const result = field.map((item) => {
@@ -75,4 +57,4 @@ for (let i = 0; i < getAllSchemas.length; i++) {
     );
 }
 
-module.exports = { filters, filterQueryResolvers, filterFields };
+module.exports = { filters, filterFields };

@@ -1,10 +1,12 @@
 /******** Queries resolvers ********/
 
 const { models } = require("../functions/functionModels");
-const { filterQueryResolvers } = require("../types/filtersTypes");
 const { error_set, errors_logs } = require("../../errors/error_logs");
 const { date } = require("../../utils/data_formats");
-const { find_all_in_database } = require("../../db/db_query");
+const {
+  find_all_in_database,
+  find_args_database,
+} = require("../../db/db_query");
 
 /***********************************************************
  Select "fieldNodes" from query (selected fields to query DB)
@@ -50,11 +52,21 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
  ****************************************************************/
 const queriesResolvers = async (parent, args, context, info, fieldName) => {
   try {
+    const model = models[fieldName.target];
     const selection = getQuerySelections(info);
-    let items = await find_all_in_database(models[fieldName.target], selection);
-    items = filterQueryResolvers(args, items);
+    let arguments = Object.entries(args);
+    let items = [];
 
-    let result = items.map((item) => {
+    if (args.searchBy) arguments = Object.entries(args.searchBy);
+
+    if (arguments.length === 0)
+      items = await find_all_in_database(model, selection);
+    else {
+      const subfields = fieldName.args.searchBy.type._fields;
+      items = await find_args_database(model, arguments, selection, subfields);
+    }
+
+    const result = items.map((item) => {
       if (selection.includes("createdAt"))
         return { ...item._doc, createdAt: date(item.createdAt) };
       if (selection.includes("updatedAt"))
