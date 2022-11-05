@@ -15,11 +15,13 @@ const find_args_database = async (db_table, args, db_fields, subfields) => {
     if (typeof value[1] === "string") {
       if (subfields[value[0]].type.name === "ID")
         return { [value[0]]: value[1] };
-      return { [value[0]]: { $regex: value[1].toString().toLowerCase() } };
+      return {
+        [value[0]]: { $regex: value[1], $options: "i" },
+      };
     } else return { [value[0]]: value[1] };
   });
 
-  return await db_table.find({ $and: values }).select(db_fields);
+  return await db_table.find({ $and: values }).select(db_fields).limit(50);
 };
 
 const find_in_database = async (db_table, id_value, db_fields) => {

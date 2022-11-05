@@ -98,7 +98,7 @@
     "getReviews__adminlevel__1": {
       "types": "list",
       "description": "Get all or a list of reviews based on arguments",
-      "args": { "id": "list", "searchBy": "searchBy", "sortBy": "sortBy"  },
+      "args": { "_id": "list", "rating": "Int", "searchBy": "searchBy", "sortBy": "sortBy"  },
       "target": "reviews"
     }
   },
