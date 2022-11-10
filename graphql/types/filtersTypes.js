@@ -2,8 +2,9 @@
 
 const { GraphQLInputObjectType } = require("graphql");
 const { getAllSchemas } = require("../../data");
-const { errors_logs, error_set } = require("../../errors/error_logs");
+const { settings } = require("../../settings");
 const { setTypes } = require("./fieldsTypes");
+const { errors_logs, error_set } = require("../../errors/error_logs");
 
 /* TODO 
   q: { type: GraphQLString },  --------- quantity
@@ -15,17 +16,34 @@ const { setTypes } = require("./fieldsTypes");
   views_gt: { type: GraphQLInt },--------- graterThen
   views_gte: { type: GraphQLInt },--------- graterOrEqualThen
 */
+/***********************************************************
+ Special TimeStamps Input Object to define a range of Dates
+ ***********************************************************/
+const timeStampsType = new GraphQLInputObjectType({
+  name: "TimeStamps",
+  fields: { from: { type: setTypes("Date") }, to: { type: setTypes("Date") } },
+  description:
+    "Special type to make `Date` scalar type human readable for example `YYYY-MM-DD`",
+});
 
 /***********************************************************
  Filter Query result based on provided filters in arguments
  ***********************************************************/
 const filterFields = (fieldName) => {
+  let timeStamp;
   const field = Object.values(fieldName);
   const result = field.map((item) => {
     if (item.select) return;
     return { [item.name]: { type: setTypes(item.types) } };
   });
-  return Object.assign({}, ...result);
+
+  if (settings.timeStamp)
+    timeStamp = {
+      createdAt: { type: timeStampsType },
+      updatedAt: { type: timeStampsType },
+    };
+
+  return Object.assign({}, ...result, timeStamp);
 };
 
 /***********************************************************

@@ -2,7 +2,7 @@
 
 const { models } = require("../functions/functionModels");
 const { error_set, errors_logs } = require("../../errors/error_logs");
-const { date } = require("../../utils/data_formats");
+const { timeStampsTransform } = require("../../utils/data_formats");
 const {
   find_all_in_database,
   find_args_database,
@@ -67,11 +67,9 @@ const queriesResolvers = async (parent, args, context, info, fieldName) => {
     }
 
     const result = items.map((item) => {
-      if (selection.includes("createdAt"))
-        return { ...item._doc, createdAt: date(item.createdAt) };
-      if (selection.includes("updatedAt"))
-        return { ...item._doc, updatedAt: date(item.updatedAt) };
-      return item._doc;
+      if (item.updatedAt || item.createdAt)
+        item = { ...item._doc, ...timeStampsTransform(item) };
+      return item;
     });
 
     if (fieldName.types === "list") return result;
