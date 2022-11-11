@@ -17,10 +17,6 @@ const dateScalar = new GraphQLScalarType({
     if (!value) return;
     return new Date(value);
   },
-  serialize(value) {
-    if (!value) return;
-    return value.toISOString();
-  },
   parseLiteral(ast) {
     if (!isNaN(Date.parse(ast.value)) && ast.kind === "StringValue") {
       return new Date(ast.value);
@@ -28,11 +24,4 @@ const dateScalar = new GraphQLScalarType({
   },
 });
 
-const timeStampsTransform = ({ createdAt, updatedAt }) => {
-  return {
-    createdAt: dateScalar.serialize(createdAt),
-    updatedAt: dateScalar.serialize(updatedAt),
-  };
-};
-
-module.exports = { validEmail, dateScalar, timeStampsTransform };
+module.exports = { validEmail, dateScalar };

@@ -28,7 +28,7 @@
     ],
     "reviews": [
       { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
-      { "name": "name", "types": "Str", "required": "true" },
+	  { "name": "name", "types": "Str", "required": "true" },
       { "name": "rating", "types": "Int", "required": "true", "default": "0"  },
       { "name": "comment", "types": "Str", "required": "true" },
       { "name": "productID", "types": "single", "ref": "products", "field": "reviewsIDs", "required": "true" },

@@ -26,7 +26,7 @@ const find_args_database = async (dbTable, arguments, dbFields, subFields) => {
     return { [argName]: argValue };
   });
 
-  return await dbTable.find({ $and: values }).select(dbFields).limit(50);
+  return await dbTable.find({ $and: values }).select(dbFields);
 };
 
 const find_in_database = async (dbTable, idValue, dbFields) => {

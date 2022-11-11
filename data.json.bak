@@ -28,7 +28,8 @@
     ],
     "reviews": [
       { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
-      { "name": "name", "types": "Str", "required": "true" },
+	  { "name": "name", "types": "Str", "required": "true" },
+      { "name": "date", "types": "Date"},
       { "name": "rating", "types": "Int", "required": "true", "default": "0"  },
       { "name": "comment", "types": "Str", "required": "true" },
       { "name": "productID", "types": "single", "ref": "products", "field": "reviewsIDs", "required": "true" },
@@ -98,7 +99,7 @@
     "getReviews__adminlevel__1": {
       "types": "list",
       "description": "Get all or a list of reviews based on arguments",
-      "args": { "_id": "list", "rating": "Int", "searchBy": "searchBy", "sortBy": "sortBy"  },
+      "args": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
       "target": "reviews"
     }
   },

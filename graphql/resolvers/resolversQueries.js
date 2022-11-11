@@ -2,7 +2,6 @@
 
 const { models } = require("../functions/functionModels");
 const { error_set, errors_logs } = require("../../errors/error_logs");
-const { timeStampsTransform } = require("../../utils/data_formats");
 const {
   find_all_in_database,
   find_args_database,
@@ -27,15 +26,18 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
     const ids = parent[item.name];
     const load = { ids, selection: getQuerySelections(info) };
     const loaderName = item.ref + `_` + item.field + `_Loader`;
+    const { page, perPage = 25 } = args;
     let result;
 
     if (item.types === "list")
       result = await context.dataloader[loaderName].loadMany([load]);
     else result = await context.dataloader[loaderName].load(load);
 
-    if (args.start || args.end) {
+    if (page !== undefined && perPage) {
+      let start = (page - 1) * perPage;
+      let end = page * perPage;
       const data = result[0].map((i) => i.ids);
-      return data.slice(args.start - 1, args.end);
+      return data.slice(start, end);
     }
 
     if (ids.length === 0) return [];
@@ -66,12 +68,7 @@ const queriesResolvers = async (parent, args, context, info, fieldName) => {
       items = await find_args_database(model, arguments, selection, subfields);
     }
 
-    const result = items.map((item) => {
-      if (item.updatedAt || item.createdAt)
-        item = { ...item._doc, ...timeStampsTransform(item) };
-      return item;
-    });
-
+    const result = items.map((item) => item);
     if (fieldName.types === "list") return result;
     else if (fieldName.types === "single") return result[0];
   } catch (err) {

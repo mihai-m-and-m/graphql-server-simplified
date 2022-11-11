@@ -19,8 +19,18 @@ const { errors_logs, error_set } = require("../../errors/error_logs");
 /***********************************************************
  Special TimeStamps Input Object to define a range of Dates
  ***********************************************************/
-const timeStampsType = new GraphQLInputObjectType({
+const TimeStampsType = new GraphQLInputObjectType({
   name: "TimeStamps",
+  fields: {
+    from: { type: setTypes("Date") },
+    to: { type: setTypes("Date") },
+  },
+  description:
+    "Special type to make `Date` scalar type human readable for example `YYYY-MM-DD`",
+});
+
+const PaginationType = new GraphQLInputObjectType({
+  name: "Pagination",
   fields: { from: { type: setTypes("Date") }, to: { type: setTypes("Date") } },
   description:
     "Special type to make `Date` scalar type human readable for example `YYYY-MM-DD`",
@@ -39,8 +49,8 @@ const filterFields = (fieldName) => {
 
   if (settings.timeStamp)
     timeStamp = {
-      createdAt: { type: timeStampsType },
-      updatedAt: { type: timeStampsType },
+      createdAt: { type: TimeStampsType },
+      updatedAt: { type: TimeStampsType },
     };
 
   return Object.assign({}, ...result, timeStamp);
@@ -59,7 +69,6 @@ const createFilterInput = (schema) => {
       description:
         "Get specific items which includes parts of one or multiple arguments.",
     });
-
     return schemaName;
   } catch (err) {
     errors_logs(err);

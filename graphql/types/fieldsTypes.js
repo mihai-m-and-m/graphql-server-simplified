@@ -10,7 +10,9 @@ const {
   GraphQLNonNull,
 } = require("graphql");
 const { error_set, errors_logs } = require("../../errors/error_logs");
+const { resolverDateFormat } = require("../resolvers/resolversDate");
 const { dateScalar } = require("../../utils/data_formats");
+const { dateFormatEnum } = require("./enumTypes");
 
 /****************************************************************************************
  Configure types for fields inside filters (searchBy, sortBy)
@@ -35,19 +37,32 @@ const setTypes = (fieldType, type = {}) => {
 /******************************************************************
  Configure Time Stamp for each field of the Schema
 *******************************************************************/
-const setTimeStamp = (field = {}) => {
-  field.createdAt = { type: new GraphQLNonNull(GraphQLString) };
-  field.updatedAt = { type: new GraphQLNonNull(GraphQLString) };
-  return field;
+const setTimeStamp = () => {
+  return {
+    createdAt: {
+      type: dateScalar,
+      args: { date: { type: dateFormatEnum } },
+      resolve(parent, args) {
+        return resolverDateFormat(parent.createdAt, args.date);
+      },
+    },
+    updatedAt: {
+      type: dateScalar,
+      args: { date: { type: dateFormatEnum } },
+      resolve(parent, args) {
+        return resolverDateFormat(parent.updatedAt, args.date);
+      },
+    },
+  };
 };
 
 /******************************************************************
  Configure nested query fields for pagination only for "list" type
- Start: number to start from
- End: end number of list items
+ page: number of page
+ perPage: number of items per page (Default 25)
 *******************************************************************/
 const setPaginationFields = () => {
-  return { start: { type: GraphQLInt }, end: { type: GraphQLInt } };
+  return { page: { type: GraphQLInt }, perPage: { type: GraphQLInt } };
 };
 
 /**************************************************
@@ -60,8 +75,7 @@ const setArgsTypes = (object) => {
 
   try {
     for (const type of types) {
-      const argName = type[0];
-      const argType = type[1];
+      const [argName, argType] = type;
       obj[argName] = (argName, { type: setTypes(argType) });
     }
     return obj;

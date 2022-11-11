@@ -10,35 +10,41 @@ const {
   setTimeStamp,
   setPaginationFields,
 } = require("../types/fieldsTypes");
+const { resolverDateFormat } = require("../resolvers/resolversDate");
+const { dateFormatEnum } = require("../types/enumTypes");
 
 /*********************************************************************
  Assign each schema field "types" and "resolver" for "nested fields"
 *********************************************************************/
-const schemafieldsTypes = (schema) => {
-  const schemaName = schema[0];
-  const fields = schema[1];
-
+const schemafieldsTypes = ([schemaName, fields]) => {
   const fieldsTypes = fields.map((field) => {
     let result = {};
     if (field.select) return;
+    if (field.args) result.args = field.args;
     if (!field.ref) result.type = setTypes(field.types);
+    if (field.description) result.description = field.description;
+    if (field.types.includes("single")) result.type = types[`${field.ref}Type`];
     if (field.types.includes("list")) {
       result.type = new GraphQLList(types[`${field.ref}Type`]);
       result.args = setPaginationFields();
     }
-    if (field.types.includes("single")) result.type = types[`${field.ref}Type`];
     if (field.required && !field.select)
       result.type = new GraphQLNonNull(result.type);
+
+    if (field.types.includes("Date")) {
+      result.args = { date: { type: dateFormatEnum } };
+      result.resolve = (parent, args) =>
+        resolverDateFormat(parent[field.name], args.date);
+    }
+
     if (field.ref)
-      result.resolve = (parent, args, context, info) => {
-        return nestedQueryResolvers(parent, args, context, info, field);
-      };
+      result.resolve = (parent, args, context, info) =>
+        nestedQueryResolvers(parent, args, context, info, field);
 
     return { [field.name]: result };
   });
 
   let schemaFields = Object.assign({}, ...fieldsTypes);
-
   if (!schemaName.includes("__noDB", -1) && settings.timeStamp)
     schemaFields = { ...schemaFields, ...setTimeStamp() };
 
