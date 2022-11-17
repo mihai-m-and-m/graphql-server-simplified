@@ -124,7 +124,7 @@
     "createCategory__adminlevel__1": {
       "target": "category",
       "args": { "name": "Str!", "productIDs": "list" },
-      "checksF": { "category": "name" },
+      "checksF": { "name": "category" },
       "save": { "category": ["save"] }
     },
     "productregister__adminlevel__3": {

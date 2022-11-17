@@ -3,7 +3,7 @@
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../../utils/jsonwebtoken");
 const { encrypt } = require("../../utils/encrypt");
-const { date, validEmail } = require("../../utils/data_formats");
+const { validEmail } = require("../../utils/data_formats");
 const { error_set, errors_logs } = require("../../errors/error_logs");
 
 const { models } = require("../functions/functionModels");
@@ -46,7 +46,6 @@ const mutation_resolver = async (mutation, parent, args, req) => {
   for (const check of checksF) {
     let find_field;
     const encrypted_field = check[0].split("__");
-
     find_field = await find_one_in_database(
       models[check[1]],
       encrypted_field[0],
@@ -116,13 +115,9 @@ const mutation_resolver = async (mutation, parent, args, req) => {
     });
 
     if (!saved) error_set("checkExisting_true", args_obj);
-
-    returned_obj = {
-      ...saved._doc,
-      createdAt: date(saved._doc.createdAt),
-      updatedAt: date(saved._doc.updatedAt),
-    };
+    returned_obj = saved;
   }
+
   for (const ret of returns) {
     if (ret[1].includes("__")) {
       let getTarget = ret[1].split("__");
