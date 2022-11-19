@@ -57,7 +57,7 @@ Every key will have a value of object made of required `target`, `types` and `ar
 
 `args` key will be an object with one or multiple valid fields from `target` key which must be a valid schema name
 
-Also inside `args` adding `searchBy` key as `searchBy` will auto make a full "search type" including all fields from `target`
+Also inside `args` adding `searchBy` key and value will auto make a full "search type" including all fields from `target`
 
 ### Supported Queries types
 
@@ -114,15 +114,15 @@ Optional `checkT` and `checkF` for checks true (if exist execute) or false (if e
 
 ## Info:
 
-Using `__noDB` at the end of table name will not be used as field into database.
+Using `__noDB` at the end of table name will not be used as table into database.
 
 Using `__auth` at the end of Query/Mutation name will require a valid token (login function)
 
 Using `__adminlevel__1` at the end of Query/Mutation name will restrict the route to specified level or below
 
-`Date` custom scalar is coming with optional `date` argument of different return formats: `LocaleDate` = 10/28/2040, `LocaleTime` = 23:58:18, `Date`= Sun Oct 28 2040, `GMT`= Sun, 28 Oct 2040 23:58:18 GMT, `ISO` = 2040-10-28T23:58:18.000Z, `DateUTC` = Sun Oct 28 2040 23:58:18 GMT+0000 (UTC), `TimeUTC` = 23:58:18 GMT+0000 (UTC)
+`Date` custom scalar is coming with optional `date` argument of different return formats: `LocaleDate` = 10/28/2040, `LocaleTime` = 23:58:18, `Date`= Sun Oct 28 2040, `GMT`= Sun, 28 Oct 2040 23:58:18 GMT, `ISO` = 2040-10-28T23:58:18.000Z, `DateUTC` = Sun Oct 28 2040 23:58:18 GMT+0000 (UTC), `TimeUTC` = 23:58:18 GMT+0000 (UTC).
 
-TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar type interval improving query filtering)
+TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar type interval improving query filtering). Default return of TimeStamps will be in `ISO` if argument `date` is not provided.
 
 `TimeStamps` as well as `graphiql` interface will be `enabled` by default but you can opt out to disable them from `settings.js` file. Inside you have extra options like `graphalDepthLimit` GraphQL Depth Limit (how deep you are alowed to query), choose between multiple `backend` API's and different `database` types.
 
@@ -134,7 +134,7 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
 	"users": [
 		{"name": "_id","types": "ID","required": "true","unique": "true"},
 		{"name": "username", "types": "Str", "required": "true" },
-		{"name": "email","types": "Str","required": "true","unique": "true"},
+		{"name": "email","types": "Str","required": "true","unique": "true", "select": "false"},
 		{"name": "password","types": "Str","required": "true", "select": "false"},
 		{"name": "adminlevel","types": "Int","required": "true","default": "0", "select": "false"},
 		{"name": "reviewsIDs", "types": "list", "ref": "reviews", "field": "userID"}
@@ -151,7 +151,7 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
 	"reviews": [
 		{"name": "_id","types": "ID","required": "true","unique": "true"},
 		{"name": "name", "types": "Str", "required": "true"},
-		{"name": "rating", "types": "Int" },
+		{"name": "rating", "types": "Int", "required": "true", "default": "0"},
 		{"name": "comment", "types": "Str", "required": "true"},
 		{"name": "productID", "types": "single", "ref": "products", "field": "reviewsIDs", "required": "true"},
 		{"name": "userID", "types": "single", "ref": "users", "field": "reviewsIDs", "required": "true" }
@@ -173,69 +173,98 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
 
 ```json
 
-"Queries": {
-	"getUser": {
-		"types": "single",
-          	"description": "Get one user based on arguments",
-          	"args": { "_id": "ID", "username": "Str", "email": "Str"},
-          	"target": "users"
-	},
-	"getProducts": {
-          	"types": "list",
-          	"description": "Get all or a list of Products based on arguments",
-          	"args": { "_id": "list", "searchBy": "Str" },
-          	"target": "products"
-	},
-	"getOrders__auth": {
-          	"types": "list",
-          	"description": "Get all or a list of orders based on arguments",
-		"args": { "_id": "list", "searchBy": "Str"},
-        	"target": "orders"
-	},
-        "getReview__adminlevel__1": {
-        	"types": "single",
-        	"description": "Get single review",
-		"args": { "_id": "ID", "searchBy": "Str" },
-          	"target": "reviews"
-	},
-}
+  "Queries": {
+    "getCategory": {
+      "types": "list",
+      "description": "Get categories of products",
+      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "target": "category"
+    },
+    "getUser__auth": {
+      "types": "single",
+      "description": "Get one user based on arguments",
+      "args": { "_id": "ID", "username": "Str", "email": "Str" },
+      "target": "users"
+    },
+    "getUsers__adminlevel__1": {
+      "types": "list",
+      "description": "Get all users if no argument or a list of users based on argument/s",
+      "args": { "username": "Str", "searchBy": "searchBy" },
+      "target": "users"
+    },
+    "getProduct__auth": {
+      "types": "single",
+      "description": "Get one product based on arguments",
+      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "target": "products"
+    },
+    "getProducts": {
+      "types": "list",
+      "description": "Get all or a list of orders based on arguments",
+      "args": { "_id": "list", "searchBy": "searchBy" },
+      "target": "products"
+    },
+    "getOrder__auth": {
+      "types": "single",
+      "description": "Get a single order based on arguments",
+      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "target": "orders"
+    },
+    "getOrders__auth": {
+      "types": "list",
+      "description": "Get all or a list of orders based on arguments",
+      "args": { "_id": "list", "searchBy": "searchBy" },
+      "target": "orders"
+    },
+    "getReview": {
+      "types": "single",
+      "description": "Get single review",
+      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "target": "reviews"
+    },
+    "getReviews__adminlevel__1": {
+      "types": "list",
+      "description": "Get all or a list of reviews based on arguments",
+      "args": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
+      "target": "reviews"
+    }
+  }
 ```
 
 #### Example of Mutations:
 
 ```json
 
-"Mutations": {
-	"register": {
-		"target": "users",
-		"args": { "username": "Str!", "email": "email!", "password": "encrypt!"},
-		"checksF": { "email": "users" },
-		"save": { "users": ["save"] }
-	},
-	"login": {
-		"target": "auth__noDB",
-		"args": {"email": "Str!","password": "Str!"},
-		"checksT": [ { "users": ["email", "password__decrypt", "adminlevel__select__jwt"] }],
-		"return": { "userID": "users__id", "token": "users__id__token", "tokenExp":"tokenExp" }
-		},
-	"createReviews__auth": {
-		"target": "reviews",
-		"args": { "name": "Str!", "comment": "Str!", "productID": "ID!", "userID": "jwt__id" },
-		"checksT": [ { "users": ["userID__id"] }, { "products": ["productID__id"] }  ],
-		"save": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
-	},
-	"createCategory__adminlevel__1": {
-		"target": "category",
-		"args": { "name": "Str!", "productIDs": "list"},
-		"checksF": { "category": "name" },
-		"save": { "category": ["save"] }
-	},
-	"productregister__adminlevel__3": {
-		"target": "products",
-		"args": {"name": "Str!","categoryIDs": "list","image": "Str","price": "Float!","description": "Str!","countInStock": "Int"},
-		"checksT": [ { "users": ["id"] }, { "category": ["productID"] }  ],
-		"save": { "products": ["save"] },
-		"return": { "products": "single" }
-	}
-}
+  "Mutations": {
+    "register": {
+      "target": "users",
+      "args": { "username": "Str!", "email": "email!", "password": "encrypt!" },
+      "checksF": [ { "users": ["email__select"] } ],
+      "save": { "users": ["save"] }
+    },
+    "login": {
+      "target": "auth__noDB",
+      "args": { "email": "Str!", "password": "Str!" },
+      "checksT": [ { "users": ["email", "password__decrypt", "adminlevel__select__jwt"] } ],
+      "return": { "userID": "users__id", "token": "users__id__token", "tokenExp": "tokenExp" }
+    },
+    "createReviews__auth": {
+      "target": "reviews",
+      "args": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
+      "checksT": [ { "users": ["userID__id"] }, { "products": ["productID__id"] } ],
+      "save": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
+    },
+    "createCategory__adminlevel__1": {
+      "target": "category",
+      "args": { "name": "Str!", "productIDs": "list" },
+      "checksF": [ { "category": ["name"] } ],
+      "save": { "category": ["save"] }
+    },
+    "productregister__adminlevel__3": {
+      "target": "products",
+      "args": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
+      "checksT": [ { "users": ["id"] }, { "category": ["productID"] } ],
+      "save": { "products": ["save"] }
+    }
+  }
 ```

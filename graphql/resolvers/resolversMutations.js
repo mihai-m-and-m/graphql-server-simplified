@@ -20,7 +20,7 @@ const {
 *********************************************************************/
 const mutation_resolver = async (mutation, parent, args, req) => {
   const checksT = mutation.checksT ? mutation.checksT : [];
-  const checksF = mutation.checksF ? Object.entries(mutation.checksF) : [];
+  const checksF = mutation.checksF ? mutation.checksF : [];
   const returns = mutation.return ? Object.entries(mutation.return) : [];
   const saver = mutation.save ? Object.entries(mutation.save) : [];
   const arguments = Object.entries(mutation.args);
@@ -44,16 +44,22 @@ const mutation_resolver = async (mutation, parent, args, req) => {
 
   //console.time("Execution Time 'for of' function");
   for (const check of checksF) {
-    let find_field;
-    const encrypted_field = check[0].split("__");
-    find_field = await find_one_in_database(
-      models[check[1]],
-      encrypted_field[0],
-      args[encrypted_field[0]],
-      encrypted_field[0]
-    );
+    console.log(check);
+    const [[modelName, fields]] = Object.entries(check);
+    let find_field, fieldError;
 
-    if (find_field) error_set("checkExisting_false", args[encrypted_field[0]]);
+    for (const field of fields) {
+      const encrypted_field = field.split("__");
+      fieldError = encrypted_field[0];
+      find_field = await find_one_in_database(
+        models[modelName],
+        encrypted_field[0],
+        args[encrypted_field[0]],
+        encrypted_field[0]
+      );
+    }
+
+    if (find_field) error_set("checkExisting_false", args[fieldError]);
   }
   //console.timeEnd("Execution Time 'for of' function");
 

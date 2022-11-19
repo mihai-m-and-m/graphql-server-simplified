@@ -1,34 +1,35 @@
 /******** DataLoader for batching on each request ********/
 
 const DataLoader = require("dataloader");
-const { find_in_database } = require("../../db/db_query");
-const { models } = require("./functionModels");
 const { getAllSchemas } = require("../../data");
+const { models } = require("./functionModels");
+const { find_in_database } = require("../../db/db_query");
 const { errors_logs, error_set } = require("../../errors/error_logs");
 
 /******************************************************************************
  Batch all Ids and selected fields from Query and sort them after DB response
 ******************************************************************************/
-const batchIdsAndSelections = async (idsAndSelections, field) => {
-  const { ids, selection } = idsAndSelections[0];
-  const list = ids[0];
+const batchIdsAndSelections = async (idsAndSelections, ref) => {
+  const { selection } = idsAndSelections[0];
   const sort = {};
+  const allIds = [];
+
   try {
-    const getFromDB = await find_in_database(models[field.ref], ids, selection);
+    for (const { ids } of idsAndSelections) {
+      ids[0] ? allIds.push(...ids) : allIds.push(ids);
+    }
+
+    const getFromDB = await find_in_database(models[ref], allIds, selection);
     getFromDB.forEach((element) => (sort[element.id] = element));
 
-    if (list)
-      return idsAndSelections.map((key) =>
-        key.ids.map((id) => ({ ids: sort[id.toString()], selection }))
-      );
-
-    return idsAndSelections.map((key) => ({
-      ids: sort[key.ids.toString()],
-      selection,
-    }));
+    return idsAndSelections.map((key) => {
+      if (key.ids[0])
+        return key.ids.map((id) => ({ ids: sort[id.toString()], selection }));
+      return { ids: sort[key.ids.toString()], selection };
+    });
   } catch (err) {
     errors_logs(err);
-    error_set("DataLoader", field + ids + err.message);
+    error_set("DataLoader", ref + allIds + err.message);
   }
 };
 
@@ -37,12 +38,12 @@ const batchIdsAndSelections = async (idsAndSelections, field) => {
 *******************************************************************/
 const obj_loader = (req, res, next) => {
   const obj = {};
-  for (const tables of getAllSchemas) {
-    for (const fields of tables[1]) {
-      const loaderName = fields.ref + `_` + fields.field + `_Loader`;
-      if (fields.field && !obj[loaderName]) {
+  for (const [tableName, fields] of getAllSchemas) {
+    for (const { ref, field } of fields) {
+      const loaderName = ref + `_` + field + `_Loader`;
+      if (field && !obj[loaderName]) {
         const batch = async (idsAndSelections) =>
-          batchIdsAndSelections(idsAndSelections, fields);
+          batchIdsAndSelections(idsAndSelections, ref);
         obj[loaderName] = new DataLoader(batch);
       }
     }

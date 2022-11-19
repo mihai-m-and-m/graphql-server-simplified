@@ -106,7 +106,7 @@
     "register": {
       "target": "users",
       "args": { "username": "Str!", "email": "email!", "password": "encrypt!" },
-      "checksF": { "email__select": "users" },
+      "checksF": [ { "users": ["email__select"] } ],
       "save": { "users": ["save"] }
     },
     "login": {
@@ -124,15 +124,14 @@
     "createCategory__adminlevel__1": {
       "target": "category",
       "args": { "name": "Str!", "productIDs": "list" },
-      "checksF": { "name": "category" },
+      "checksF": [ { "category": ["name"] } ],
       "save": { "category": ["save"] }
     },
     "productregister__adminlevel__3": {
       "target": "products",
       "args": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
-      "checksT": [{ "users": ["id"] }, { "category": ["productID"] }],
-      "save": { "products": ["save"] },
-      "return": { "products": "single" }
+      "checksT": [ { "users": ["id"] }, { "category": ["productID"] } ],
+      "save": { "products": ["save"] }
     }
   }
 }
