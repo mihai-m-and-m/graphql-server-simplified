@@ -21,14 +21,14 @@ const {
  Checks False(if not in DB), Savings, Returns, etc...) 
 *********************************************************************/
 const mutation_resolver = async (mutation, parent, args, req) => {
-  const { arguments, checksT, checksF, saving, returns } = mutation;
+  const { arguments, checksT, checksF, savings, returns } = mutation;
   let returnedObj = {};
   let checks = [];
   const argsObj = await argumentsFunction(arguments, args, req);
   if (checksF) await checkFalseFunction(checksF, args);
   if (checksT) checks = await checkTrueFunction(checksT, argsObj);
   const [result, JWTFields] = checks;
-  if (saving) returnedObj = await saveFunction(saving, argsObj, result);
+  if (savings) returnedObj = await saveFunction(savings, argsObj, result);
   if (returns) returnedObj = await returnFunction(returns, result, JWTFields);
   return returnedObj;
 };

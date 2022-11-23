@@ -50,55 +50,55 @@
     "getCategory": {
       "types": "list",
       "description": "Get categories of products",
-      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy" },
       "target": "category"
     },
     "getUser__auth": {
       "types": "single",
       "description": "Get one user based on arguments",
-      "args": { "_id": "ID", "username": "Str", "email": "Str" },
+      "arguments": { "_id": "ID", "username": "Str", "email": "Str" },
       "target": "users"
     },
     "getUsers__adminlevel__1": {
       "types": "list",
       "description": "Get all users if no argument or a list of users based on argument/s",
-      "args": { "username": "Str", "searchBy": "searchBy" },
+      "arguments": { "username": "Str", "searchBy": "searchBy" },
       "target": "users"
     },
     "getProduct__auth": {
       "types": "single",
       "description": "Get one product based on arguments",
-      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy" },
       "target": "products"
     },
     "getProducts": {
       "types": "list",
       "description": "Get all or a list of orders based on arguments",
-      "args": { "_id": "list", "searchBy": "searchBy" },
+      "arguments": { "_id": "list", "searchBy": "searchBy" },
       "target": "products"
     },
     "getOrder__auth": {
       "types": "single",
       "description": "Get a single order based on arguments",
-      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy" },
       "target": "orders"
     },
     "getOrders__auth": {
       "types": "list",
       "description": "Get all or a list of orders based on arguments",
-      "args": { "_id": "list", "searchBy": "searchBy" },
+      "arguments": { "_id": "list", "searchBy": "searchBy" },
       "target": "orders"
     },
     "getReview": {
       "types": "single",
       "description": "Get single review",
-      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy" },
       "target": "reviews"
     },
     "getReviews__auth": {
       "types": "list",
       "description": "Get all or a list of reviews based on arguments",
-      "args": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
+      "arguments": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
       "target": "reviews"
     }
   },

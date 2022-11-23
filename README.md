@@ -53,11 +53,11 @@ Define "Queries" as key inside `data.json` file from root folder.
 
 Value will be one object with keys as "Query root types"
 
-Every key will have a value of object made of required `target`, `types` and `args` . Also you can optionally add `description`
+Every key will have a value of object made of required `target`, `types` and `arguments` . Also you can optionally add `description`
 
-`args` key will be an object with one or multiple valid fields from `target` key which must be a valid schema name
+`arguments` key will be an object with one or multiple valid fields from `target` key which must be a valid schema name
 
-Also inside `args` adding `searchBy` key and value will auto make a full "search type" including all fields from `target`
+Also inside `arguments` adding `searchBy` key and value will auto make a full "search type" including all fields from `target`
 
 ### Supported Queries types
 
@@ -72,13 +72,13 @@ Define "Mutations" as key inside `data.json` file from root folder.
 
 Value will be one object with keys as "Mutations root types"
 
-Every mutation will have a `target` and `args`
+Every mutation will have `target` and `arguments` keys
 
 Optional `checkT` and `checkF` for checks true (if exist execute) or false (if exist throw error) before execution of mutation. The format should be array of objects with table name as key and array of fields names as value
 
-`save` or `return` keys will make the mutation resolver as required.
+`savings` or `return` keys will make the mutation resolver as required.
 
-### Special types for Mutations `args`
+### Special types for Mutations `arguments`
 
 | Value     | Description of value Type                             |
 | --------- | ----------------------------------------------------- |
@@ -89,18 +89,18 @@ Optional `checkT` and `checkF` for checks true (if exist execute) or false (if e
 
 ### Special types for Mutations `checkT`
 
-| Value            | Description of value                        |
-| ---------------- | ------------------------------------------- |
-| `__decrypt`      | decrypt the field previous encrypted        |
-| `__select`       | select field with `select: false` in schema |
-| `__jwt`          | compare with field in `jsonwebtoken`        |
-| `<args_key>__id` | check args field with database \_id         |
+| Value                 | Description of value                        |
+| --------------------- | ------------------------------------------- |
+| `__decrypt`           | decrypt the field previous encrypted        |
+| `__select`            | select field with `select: false` in schema |
+| `__jwt`               | compare with field in `jsonwebtoken`        |
+| `<arguments_key>__id` | check arguments field with database \_id    |
 
 ### Special types for Mutations `save` key
 
 | Value              | Description of value                             |
 | ------------------ | ------------------------------------------------ |
-| `save`             | save into specified table inside database        |
+| `saving`           | save into specified table inside database        |
 | `<table>__<field>` | update database specific table and field with id |
 
 ### Special types for Mutations `return` keys
@@ -249,7 +249,7 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
       "target": "users",
       "arguments": { "username": "Str!", "email": "email!", "password": "encrypt!" },
       "checksF": [ { "users": ["email__select"] } ],
-      "saving": { "users": ["save"] }
+      "savings": { "users": ["save"] }
     },
     "login": {
       "target": "auth__noDB",
@@ -261,19 +261,19 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
       "target": "reviews",
       "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
       "checksT": [ { "users": ["userID__id"] }, { "products": ["productID__id"] } ],
-      "saving": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
+      "savings": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
     },
     "createCategory__adminlevel__1": {
       "target": "category",
       "arguments": { "name": "Str!", "productIDs": "list" },
       "checksF": [ { "category": ["name"] } ],
-      "saving": { "category": ["save"] }
+      "savings": { "category": ["save"] }
     },
     "productregister__adminlevel__3": {
       "target": "products",
       "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
       "checksT": [ { "users": ["id"] }, { "category": ["productID"] } ],
-      "saving": { "products": ["save"] }
+      "savings": { "products": ["save"] }
     }
   }
 ```
