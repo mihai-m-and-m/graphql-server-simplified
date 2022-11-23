@@ -25,13 +25,14 @@ const setQueriesFields = (fieldName, protect) => {
   fieldName.types === "single" &&
     (fieldName.type = types[`${fieldName.target}Type`]);
 
-  fieldName.args &&
-    (fieldName.args = setArgsTypes(fieldName.args, fieldName.target));
+  fieldName.arguments &&
+    (fieldName.arguments = setArgsTypes(fieldName.arguments, fieldName.target));
 
-  fieldName.args.searchBy &&
-    (fieldName.args.searchBy.type = filters[`${fieldName.target}Search`]);
+  fieldName.arguments.searchBy &&
+    (fieldName.arguments.searchBy.type = filters[`${fieldName.target}Search`]);
 
-  fieldName.args.sortBy && (fieldName.args.sortBy.type = enumTypes.sort);
+  fieldName.arguments.sortBy &&
+    (fieldName.arguments.sortBy.type = enumTypes.sort);
 
   fieldName.resolve = async (parent, args, context, info) => {
     protectQueryAndMutations(protect, context);
@@ -40,7 +41,7 @@ const setQueriesFields = (fieldName, protect) => {
 
   const field = { type: fieldName.type };
   fieldName.description && (field.description = fieldName.description);
-  fieldName.args && (field.args = fieldName.args);
+  fieldName.arguments && (field.args = fieldName.arguments);
   fieldName.resolve && (field.resolve = fieldName.resolve);
 
   return field;
@@ -49,19 +50,18 @@ const setQueriesFields = (fieldName, protect) => {
 /*****************************************************************
  Generate all the Query's based on provided Queries object
 *****************************************************************/
-let Query = {};
+let Query = new Map();
 for (let i = 0; i < getAllQueries.length; i++) {
-  let queryName = getAllQueries[i][0];
-  const queryValues = getAllQueries[i][1];
+  let [queryName, queryValues] = getAllQueries[i];
   try {
     const protect = protectQueryAndMutationsFields(queryName);
     protect && (queryName = protect[0]);
 
-    Query[queryName] = setQueriesFields(queryValues, protect);
+    Query.set(queryName, setQueriesFields(queryValues, protect));
   } catch (err) {
     errors_logs(err);
     error_set("Queries", queryName + queryValues.name + err.message);
   }
 }
-
+Query = Object.fromEntries(Query);
 module.exports = { Query };

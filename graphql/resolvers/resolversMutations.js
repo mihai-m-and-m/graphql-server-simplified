@@ -1,5 +1,4 @@
 /******** Mutations resolvers ********/
-
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../../utils/jsonwebtoken");
 const { encrypt } = require("../../utils/encrypt");
@@ -15,134 +14,143 @@ const {
 } = require("../../db/db_query");
 
 /*********************************************************************
- Assign for each Mutation resolver (Arguments, Checks True(if exists),
- Checks False(if not in DB), Savings, Returns, etc...) 
+Check every argument from mutation and assign to new object "argsObj"
 *********************************************************************/
-const mutation_resolver = async (mutation, parent, args, req) => {
-  const checksT = mutation.checksT ? mutation.checksT : [];
-  const checksF = mutation.checksF ? mutation.checksF : [];
-  const returns = mutation.return ? Object.entries(mutation.return) : [];
-  const saver = mutation.save ? Object.entries(mutation.save) : [];
-  const arguments = Object.entries(mutation.args);
+const argumentsFunction = async (arguments, args, req, argsObj = {}) => {
+  const arg = Object.entries(arguments);
+  for (const [argName, argType] of arg) {
+    if (argType.includes("email") && !args[argName].match(validEmail()))
+      error_set("checkValidEmail", args[argName]);
 
-  let args_obj = {};
-  let returned_obj = {};
-  let JWT_fields = {};
-  let result = {};
+    if (!argType.includes("jwt") && !argType.includes("encrypt"))
+      argsObj[argName] = args[argName];
 
-  for (const arg of arguments) {
-    if (arg[1].includes("email") && !args[arg[0]].match(validEmail()))
-      error_set("checkValidEmail", args[arg[0]]);
-    if (arg[1].includes("encrypt"))
-      args_obj[arg[0]] = await encrypt(args[arg[0]]);
-    else if (arg[1].includes("jwt")) {
-      const field = arg[1].split("__");
-      args_obj[arg[0]] = req?.token?.[field[1]];
-      if (field[2]) args_obj[arg[0]] = req?.token?.[field[1]][field[2]];
-    } else args_obj[arg[0]] = args[arg[0]];
+    if (argType.includes("encrypt"))
+      argsObj[argName] = await encrypt(args[argName]);
+
+    if (argType.includes("jwt")) {
+      const [jwt, field, info] = argType.split("__");
+      argsObj[argName] = req?.token?.[field];
+      info && (argsObj[argName] = req?.token?.[field][info]);
+    }
   }
+  return argsObj;
+};
 
-  //console.time("Execution Time 'for of' function");
-  for (const check of checksF) {
-    console.log(check);
-    const [[modelName, fields]] = Object.entries(check);
-    let find_field, fieldError;
+/*********************************************************************
+Check every field from "checksF" (checkFalse) if exist throw error
+*********************************************************************/
+const checkFalseFunction = async (checksF, args, findField, fieldError) => {
+  for (const checkFalse of checksF) {
+    const [[modelName, fields]] = Object.entries(checkFalse);
+    for (const fieldAndProperty of fields) {
+      const [field, property] = fieldAndProperty.split("__");
+      let encryptedField;
+      fieldError = field;
+      if (property) encryptedField = field;
 
-    for (const field of fields) {
-      const encrypted_field = field.split("__");
-      fieldError = encrypted_field[0];
-      find_field = await find_one_in_database(
+      findField = await find_one_in_database(
         models[modelName],
-        encrypted_field[0],
-        args[encrypted_field[0]],
-        encrypted_field[0]
+        field,
+        args[field],
+        encryptedField
+      );
+    }
+  }
+  findField && error_set("checkExisting_false", args[fieldError]);
+};
+
+/*********************************************************************
+Check every object from "checksT" (checkTrue) if not exist throw error
+*********************************************************************/
+const checkTrueFunction = async (checksT, argsObj, result = {}) => {
+  let JWTFields = {};
+  for (const checkTrue of checksT) {
+    const [[tableName, values]] = Object.entries(checkTrue);
+    let encryptedFields = [];
+    let findField;
+
+    for (const element of values) {
+      const [field, encryptedType, JWT] = element.split("__");
+      encryptedFields.push(field);
+      if (encryptedType && encryptedType.includes("id")) {
+        findField = await find_by_id(models[tableName], argsObj[field]);
+        !findField && error_set("checkExisting_true", field);
+      }
+    }
+    /*** search for item, based on first value  ***/
+    if (!values[0].includes("id")) {
+      findField = await find_one_in_database(
+        models[tableName],
+        values[0],
+        argsObj[values[0]],
+        encryptedFields
       );
     }
 
-    if (find_field) error_set("checkExisting_false", args[fieldError]);
-  }
-  //console.timeEnd("Execution Time 'for of' function");
+    !findField && error_set("checkExisting_true", values[0]);
+    result[tableName] = { ...findField._doc };
 
-  for (const check of checksT) {
-    const key = Object.keys(check);
-    const values = Object.values(check);
-    for (const element of values[0]) {
-      let find_field;
-      const encrypted_field = element.split("__");
-      if (element.includes("__id")) {
-        find_field = await find_by_id(
-          models[key],
-          args_obj[encrypted_field[0]]
-        );
-      } else {
-        find_field = await find_one_in_database(
-          models[key],
-          values[0][0],
-          args_obj[values[0][0]],
-          encrypted_field[0]
-        );
-      }
-      result[key] = { ...find_field?._doc };
-
-      if (encrypted_field.includes("jwt"))
-        JWT_fields[encrypted_field[0]] = find_field[encrypted_field[0]];
-
-      if (encrypted_field[1] === "decrypt") {
-        find_field = await bcrypt.compare(
-          args[encrypted_field[0]],
-          find_field[encrypted_field[0]]
-        );
-      }
-
-      if (!find_field)
-        error_set(
-          "checkExisting_true",
-          encrypted_field ? encrypted_field[0] : element
-        );
-    }
-  }
-
-  for (const save of saver) {
-    let saved;
-    if (save[1].includes("save"))
-      saved = await save_in_database(models[save[0]], args_obj);
-
-    save[1].map(async (saving) => {
-      const model = saving.split("__");
-
-      if (model[1]) {
-        saved = await update_in_database(
-          models[model[0]],
-          model,
-          result,
-          saved
-        );
-      }
-    });
-
-    if (!saved) error_set("checkExisting_true", args_obj);
-    returned_obj = saved;
-  }
-
-  for (const ret of returns) {
-    if (ret[1].includes("__")) {
-      let getTarget = ret[1].split("__");
-      if (getTarget[1] === "id") getTarget[1] = "_id";
-      returned_obj[ret[0]] = result[getTarget[0]][getTarget[1]];
-      if (getTarget.includes("token")) {
-        const token = generateToken(
-          result[getTarget[0]][getTarget[1]],
-          JWT_fields
-        );
-        returned_obj[ret[0]] = token;
+    for (const element of values) {
+      const [field, encryptedType, JWT] = element.split("__");
+      if (JWT) JWTFields[field] = findField[field];
+      if (encryptedType && encryptedType.includes("decrypt")) {
+        const compare = await bcrypt.compare(argsObj[field], findField[field]);
+        !compare && error_set("checkExisting_true", field);
       }
     }
-    if (ret[1] === "tokenExp") {
-      returned_obj[ret[0]] = `${process.env.JWT_EXPIRES}`;
-    }
   }
 
-  return returned_obj;
+  return [result, JWTFields];
 };
 
-module.exports = { mutation_resolver };
+/*********************************************
+Save in database every "saving" from mutations
+**********************************************/
+const saveFunction = async (saver, argsObj, result, obj = {}) => {
+  const saverMap = new Map(Object.entries(saver));
+  for (const [tableName, save] of saverMap) {
+    if (save.includes("save"))
+      obj = await save_in_database(models[tableName], argsObj);
+    if (obj)
+      save.map(async (saving) => {
+        const [tableName, field] = saving.split("__");
+        if (field)
+          obj = await update_in_database(
+            models[tableName],
+            tableName,
+            field,
+            result,
+            obj
+          );
+      });
+    if (!obj) error_set("checkExisting_true", argsObj);
+    return obj;
+  }
+};
+
+/*********************************************
+Return special "return" fields from mutations
+**********************************************/
+const returnFunction = (returns, result, JWTFields) => {
+  const returnedObj = new Map();
+  Object.entries(returns).map(([field, value]) => {
+    const [tableName, tableField, token] = value.split("__");
+    if (tableName.includes("tokenExp"))
+      returnedObj.set(field, process.env.JWT_EXPIRES);
+    if (tableField) returnedObj.set(field, result[tableName][tableField]);
+    if (token) {
+      const token = generateToken(result[tableName][tableField], JWTFields);
+      returnedObj.set(field, token);
+    }
+  });
+  return Object.fromEntries(returnedObj);
+};
+
+module.exports = {
+  argumentsFunction,
+  checkFalseFunction,
+  checkTrueFunction,
+  saveFunction,
+  returnFunction,
+};

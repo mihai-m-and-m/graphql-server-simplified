@@ -130,43 +130,52 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
 
 ```json
 
-"Schemas": {
-	"users": [
-		{"name": "_id","types": "ID","required": "true","unique": "true"},
-		{"name": "username", "types": "Str", "required": "true" },
-		{"name": "email","types": "Str","required": "true","unique": "true", "select": "false"},
-		{"name": "password","types": "Str","required": "true", "select": "false"},
-		{"name": "adminlevel","types": "Int","required": "true","default": "0", "select": "false"},
-		{"name": "reviewsIDs", "types": "list", "ref": "reviews", "field": "userID"}
-	],
-	"products": [
-		{"name": "_id", "types": "ID","required": "true","unique": "true"},
-		{"name": "name", "types": "Str", "required": "true" },
-		{"name": "categoryIDs", "types": "list", "ref": "category", "field": "productsIDs"},
-		{"name": "price", "types": "Float", "required": "true" },
-		{"name": "description","types": "Str","required": "true"},
-		{"name": "countInStock","types": "Int","required": "true","default": "1"},
-		{"name": "reviewsIDs", "types": "list", "ref": "reviews", "field": "productID"}
-	],
-	"reviews": [
-		{"name": "_id","types": "ID","required": "true","unique": "true"},
-		{"name": "name", "types": "Str", "required": "true"},
-		{"name": "rating", "types": "Int", "required": "true", "default": "0"},
-		{"name": "comment", "types": "Str", "required": "true"},
-		{"name": "productID", "types": "single", "ref": "products", "field": "reviewsIDs", "required": "true"},
-		{"name": "userID", "types": "single", "ref": "users", "field": "reviewsIDs", "required": "true" }
-	],
-	"category": [
-		{"name": "_id","types": "ID","required": "true","unique": "true"},
-		{"name": "name", "types": "Str", "required": "true"},
-		{"name": "productsIDs", "types": "list", "ref": "products", "field": "categoryIDs"}
-	],
-	"auth__noDB": [
-		{"name": "userID","types": "ID", "required": "true"},
-		{"name": "token", "types": "Str", "required": "true"},
-		{"name": "tokenExp", "types": "Str", "required": "true"}
-	]
-}
+  "Schemas": {
+    "users": [
+      { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+      { "name": "username", "types": "Str", "required": "true" },
+      { "name": "email", "types": "Str", "required": "true", "unique": "true", "select": "false" },
+      { "name": "password", "types": "Str", "required": "true", "select": "false" },
+      { "name": "adminlevel", "types": "Int", "required": "true", "default": "0", "select": "false" },
+      { "name": "reviewsIDs", "types": "list", "ref": "reviews", "field": "userID" },
+      { "name": "ordersIDs", "types": "list", "ref": "orders", "field": "userID" }
+    ],
+    "products": [
+      { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+      { "name": "name", "types": "Str", "required": "true" },
+      { "name": "categoryIDs", "types": "list", "ref": "category", "field": "productsIDs" },
+      { "name": "image", "types": "Str" },
+      { "name": "price", "types": "Float", "required": "true" },
+      { "name": "description", "types": "Str", "required": "true" },
+      { "name": "countInStock", "types": "Int", "required": "true", "default": "1" },
+      { "name": "productRating", "types": "Int", "default": "0" },
+      { "name": "reviewsIDs", "types": "list", "ref": "reviews", "field": "productID" }
+    ],
+    "orders": [
+      { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+      { "name": "userID", "types": "single", "ref": "users", "field": "ordersIDs", "required": "true" },
+      { "name": "orderItems", "types": "list", "ref": "products", "required": "true" },
+      { "name": "shippingAddress", "types": "Str" }
+    ],
+    "reviews": [
+      { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+	  { "name": "name", "types": "Str", "required": "true" },
+      { "name": "rating", "types": "Int", "required": "true", "default": "0"  },
+      { "name": "comment", "types": "Str", "required": "true" },
+      { "name": "productID", "types": "single", "ref": "products", "field": "reviewsIDs", "required": "true" },
+      { "name": "userID", "types": "single", "ref": "users", "field": "reviewsIDs", "required": "true" }
+    ],
+    "category": [
+      { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+      { "name": "name", "types": "Str", "required": "true" },
+      { "name": "productsIDs", "types": "list", "ref": "products", "field": "categoryIDs" }
+    ],
+    "auth__noDB": [
+      { "name": "userID", "types": "ID", "required": "true" },
+      { "name": "token", "types": "Str", "required": "true" },
+      { "name": "tokenExp", "types": "Str", "required": "true" }
+    ]
+  }
 ```
 
 #### Example of Queries:
@@ -177,55 +186,55 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
     "getCategory": {
       "types": "list",
       "description": "Get categories of products",
-      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy" },
       "target": "category"
     },
     "getUser__auth": {
       "types": "single",
       "description": "Get one user based on arguments",
-      "args": { "_id": "ID", "username": "Str", "email": "Str" },
+      "arguments": { "_id": "ID", "username": "Str", "email": "Str" },
       "target": "users"
     },
     "getUsers__adminlevel__1": {
       "types": "list",
       "description": "Get all users if no argument or a list of users based on argument/s",
-      "args": { "username": "Str", "searchBy": "searchBy" },
+      "arguments": { "username": "Str", "searchBy": "searchBy" },
       "target": "users"
     },
     "getProduct__auth": {
       "types": "single",
       "description": "Get one product based on arguments",
-      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy" },
       "target": "products"
     },
     "getProducts": {
       "types": "list",
       "description": "Get all or a list of orders based on arguments",
-      "args": { "_id": "list", "searchBy": "searchBy" },
+      "arguments": { "_id": "list", "searchBy": "searchBy" },
       "target": "products"
     },
     "getOrder__auth": {
       "types": "single",
       "description": "Get a single order based on arguments",
-      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy" },
       "target": "orders"
     },
     "getOrders__auth": {
       "types": "list",
       "description": "Get all or a list of orders based on arguments",
-      "args": { "_id": "list", "searchBy": "searchBy" },
+      "arguments": { "_id": "list", "searchBy": "searchBy" },
       "target": "orders"
     },
     "getReview": {
       "types": "single",
       "description": "Get single review",
-      "args": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy" },
       "target": "reviews"
     },
-    "getReviews__adminlevel__1": {
+    "getReviews__auth": {
       "types": "list",
       "description": "Get all or a list of reviews based on arguments",
-      "args": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
+      "arguments": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
       "target": "reviews"
     }
   }
@@ -238,33 +247,33 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
   "Mutations": {
     "register": {
       "target": "users",
-      "args": { "username": "Str!", "email": "email!", "password": "encrypt!" },
+      "arguments": { "username": "Str!", "email": "email!", "password": "encrypt!" },
       "checksF": [ { "users": ["email__select"] } ],
-      "save": { "users": ["save"] }
+      "saving": { "users": ["save"] }
     },
     "login": {
       "target": "auth__noDB",
-      "args": { "email": "Str!", "password": "Str!" },
+      "arguments": { "email": "Str!", "password": "Str!" },
       "checksT": [ { "users": ["email", "password__decrypt", "adminlevel__select__jwt"] } ],
-      "return": { "userID": "users__id", "token": "users__id__token", "tokenExp": "tokenExp" }
+      "returns": { "userID": "users___id", "token": "users___id__token", "tokenExp": "tokenExp" }
     },
     "createReviews__auth": {
       "target": "reviews",
-      "args": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
+      "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
       "checksT": [ { "users": ["userID__id"] }, { "products": ["productID__id"] } ],
-      "save": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
+      "saving": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
     },
     "createCategory__adminlevel__1": {
       "target": "category",
-      "args": { "name": "Str!", "productIDs": "list" },
+      "arguments": { "name": "Str!", "productIDs": "list" },
       "checksF": [ { "category": ["name"] } ],
-      "save": { "category": ["save"] }
+      "saving": { "category": ["save"] }
     },
     "productregister__adminlevel__3": {
       "target": "products",
-      "args": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
+      "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
       "checksT": [ { "users": ["id"] }, { "category": ["productID"] } ],
-      "save": { "products": ["save"] }
+      "saving": { "products": ["save"] }
     }
   }
 ```

@@ -41,6 +41,7 @@ const find_in_database = async (dbTable, idValue, dbFields) => {
 const find_by_id = async (dbTable, idValue) => {
   let result;
   if (idValue.toString().match(/^[0-9a-fA-F]{24}$/))
+    // valid ID characters
     result = await dbTable.findById(idValue);
 
   return result;
@@ -50,15 +51,10 @@ const find_one_in_database = async (
   dbTable,
   dbField,
   argsValue,
-  encryptedField = ""
+  encryptedFields = ""
 ) => {
-  let result;
-  !encryptedField
-    ? (result = await dbTable.findOne({ [dbField]: argsValue }))
-    : (result = await dbTable
-        .findOne({ [dbField]: argsValue })
-        .select(encryptedField));
-  return result;
+  const find = { [dbField]: { $regex: `^${argsValue}$`, $options: "i" } }; // exact match with case insensitive search
+  return await dbTable.findOne(find).select(encryptedFields);
 };
 
 const save_in_database = async (dbTable, argsValues) => {
@@ -67,10 +63,16 @@ const save_in_database = async (dbTable, argsValues) => {
   return result;
 };
 
-const update_in_database = async (dbTable, dbField, savedObj, value) => {
+const update_in_database = async (
+  dbTable,
+  updateTable,
+  updateField,
+  updateObj,
+  savedObj
+) => {
   let result;
-  result = await find_by_id(dbTable, savedObj[dbField[0]]._id);
-  result[dbField[1]].push(value._id);
+  result = await find_by_id(dbTable, updateObj[updateTable]._id);
+  result[updateField].push(savedObj._id);
   await result.save();
   return result;
 };

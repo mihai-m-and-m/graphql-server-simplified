@@ -95,7 +95,7 @@
       "args": { "_id": "ID", "searchBy": "searchBy" },
       "target": "reviews"
     },
-    "getReviews__adminlevel__1": {
+    "getReviews__auth": {
       "types": "list",
       "description": "Get all or a list of reviews based on arguments",
       "args": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
@@ -105,33 +105,33 @@
   "Mutations": {
     "register": {
       "target": "users",
-      "args": { "username": "Str!", "email": "email!", "password": "encrypt!" },
+      "arguments": { "username": "Str!", "email": "email!", "password": "encrypt!" },
       "checksF": [ { "users": ["email__select"] } ],
-      "save": { "users": ["save"] }
+      "saving": { "users": ["save"] }
     },
     "login": {
       "target": "auth__noDB",
-      "args": { "email": "Str!", "password": "Str!" },
+      "arguments": { "email": "Str!", "password": "Str!" },
       "checksT": [ { "users": ["email", "password__decrypt", "adminlevel__select__jwt"] } ],
-      "return": { "userID": "users__id", "token": "users__id__token", "tokenExp": "tokenExp" }
+      "returns": { "userID": "users___id", "token": "users___id__token", "tokenExp": "tokenExp" }
     },
     "createReviews__auth": {
       "target": "reviews",
-      "args": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
+      "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
       "checksT": [ { "users": ["userID__id"] }, { "products": ["productID__id"] } ],
-      "save": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
+      "saving": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
     },
     "createCategory__adminlevel__1": {
       "target": "category",
-      "args": { "name": "Str!", "productIDs": "list" },
-      "checksF": [ { "category": ["name"] }, { "category": ["name"] } ],
-      "save": { "category": ["save"] }
+      "arguments": { "name": "Str!", "productIDs": "list" },
+      "checksF": [ { "category": ["name"] } ],
+      "saving": { "category": ["save"] }
     },
     "productregister__adminlevel__3": {
       "target": "products",
-      "args": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
+      "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
       "checksT": [ { "users": ["id"] }, { "category": ["productID"] } ],
-      "save": { "products": ["save"] }
+      "saving": { "products": ["save"] }
     }
   }
 }
