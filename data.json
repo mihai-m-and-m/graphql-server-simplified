@@ -96,10 +96,10 @@
       "target": "reviews"
     },
     "getReviews__auth": {
-      "types": "list",
+      "types": "list!",
       "description": "Get all or a list of reviews based on arguments",
       "arguments": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
-      "target": "reviews"
+      "target": "reviews!"
     }
   },
   "Mutations": {

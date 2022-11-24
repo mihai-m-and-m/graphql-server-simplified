@@ -1,6 +1,8 @@
 # graphql-server-simplified
 
-Get a full GraphQL API server with MongoDB database from a simple json file.
+This is a work in progress any change at any time could be a braking change before the first stable release (1.0.0)
+
+Get a full GraphQL API server with MongoDB (for now) database from a simple json file.
 
 This server includes `express, express-graphql, graphql, mongoose, cors, dataloader, dotenv, mysql2, graphql-depth-limit` packages as default.
 
@@ -53,7 +55,7 @@ Define "Queries" as key inside `data.json` file from root folder.
 
 Value will be one object with keys as "Query root types"
 
-Every key will have a value of object made of required `target`, `types` and `arguments` . Also you can optionally add `description`
+Every key will have a value of object made of required `target`, `types` and `arguments` . Also you can optionally add `description` or `!` at end of `target` or `types` fields for Non-Nullable list/schema
 
 `arguments` key will be an object with one or multiple valid fields from `target` key which must be a valid schema name
 
@@ -61,10 +63,11 @@ Also inside `arguments` adding `searchBy` key and value will auto make a full "s
 
 ### Supported Queries types
 
-| Types  | Description GraphQL Type     |
-| ------ | ---------------------------- |
-| list   | returns `GraphQLList`of ID's |
-| single | returns `GraphQLID`          |
+| Types  | Description GraphQL Type                  |
+| ------ | ----------------------------------------- |
+| list   | returns `GraphQLList`of ID's              |
+| single | returns `GraphQLID`                       |
+| !      | add at end of single/list for NonNullable |
 
 ## 3rd Step - define Mutations
 
@@ -196,10 +199,10 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
       "target": "users"
     },
     "getUsers__adminlevel__1": {
-      "types": "list",
+      "types": "list!",
       "description": "Get all users if no argument or a list of users based on argument/s",
       "arguments": { "username": "Str", "searchBy": "searchBy" },
-      "target": "users"
+      "target": "users!"
     },
     "getProduct__auth": {
       "types": "single",

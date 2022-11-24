@@ -1,6 +1,6 @@
 /******** Generate All Mutations ********/
 
-const { types } = require("./functionTypes");
+const { getAllTypes } = require("./functionTypes");
 const { getAllMutations } = require("../../data");
 const { setArgsTypes } = require("../types/fieldsTypes");
 const { errors_logs, error_set } = require("../../errors/error_logs");
@@ -44,7 +44,7 @@ for (const mutation of getAllMutations) {
     protect && (mutationName = protect[0]);
 
     setAllMutations.set(mutationName, {
-      type: types[`${mutationFields.target}Type`],
+      type: getAllTypes[`${mutationFields.target}Type`],
       args: setArgsTypes(mutationFields.arguments),
       async resolve(parent, args, req) {
         protectQueryAndMutations(protect, req);

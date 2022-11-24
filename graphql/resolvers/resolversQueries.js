@@ -30,19 +30,20 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
     let result;
 
     if (item.types === "list")
-      result = await context.dataloader[loaderName].loadMany([load]);
+      [result] = await context.dataloader[loaderName].loadMany([load]);
     else result = await context.dataloader[loaderName].load(load);
 
     if (page !== undefined && perPage) {
       let start = (page - 1) * perPage;
       let end = page * perPage;
-      const data = result[0].map((i) => i.ids);
+      if (!result[0]) return [];
+      console.log(result);
+      const data = result.map((i) => i.ids);
       return data.slice(start, end);
     }
-
     if (ids.length === 0) return [];
     if (item.types === "single") return result.ids;
-    return result[0].map((i) => i.ids);
+    return result.map((i) => i.ids);
   } catch (err) {
     errors_logs(err);
     error_set("nestedQueryResolvers", item.name + err.message);

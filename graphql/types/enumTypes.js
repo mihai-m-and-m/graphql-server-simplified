@@ -1,15 +1,6 @@
 /******** Define EnumType ********/
 
-const {
-  GraphQLEnumType,
-  GraphQLInputObjectType,
-  GraphQLString,
-  GraphQLInt,
-  GraphQLID,
-  GraphQLBoolean,
-  GraphQLFloat,
-  GraphQLList,
-} = require("graphql");
+const { GraphQLEnumType } = require("graphql");
 
 const sort = new GraphQLEnumType({
   name: "Sort",

@@ -23,9 +23,10 @@ const schemafieldsTypes = ([schemaName, fields]) => {
     if (field.args) result.args = field.args;
     if (!field.ref) result.type = setTypes(field.types);
     if (field.description) result.description = field.description;
-    if (field.types.includes("single")) result.type = types[`${field.ref}Type`];
+    if (field.types.includes("single"))
+      result.type = getAllTypes[`${field.ref}Type`];
     if (field.types.includes("list")) {
-      result.type = new GraphQLList(types[`${field.ref}Type`]);
+      result.type = new GraphQLList(getAllTypes[`${field.ref}Type`]);
       result.args = setPaginationFields();
     }
     if (field.required && !field.select)
@@ -54,7 +55,7 @@ const schemafieldsTypes = ([schemaName, fields]) => {
 /**********************************
  Create GraphQL Types from Schemas
 ***********************************/
-const types = {};
+let getAllTypes = new Map();
 const createType = (schema) => {
   let schemaName = schema[0];
   schemaName = new GraphQLObjectType({
@@ -66,11 +67,12 @@ const createType = (schema) => {
 
 for (let i = 0; i < getAllSchemas.length; i++) {
   try {
-    types[getAllSchemas[i][0] + `Type`] = createType(getAllSchemas[i]);
+    getAllTypes.set(`${getAllSchemas[i][0]}Type`, createType(getAllSchemas[i]));
   } catch (err) {
     errors_logs(err);
     error_set("createType", err.message);
   }
 }
+getAllTypes = Object.fromEntries(getAllTypes);
 
-module.exports = { types };
+module.exports = { getAllTypes };

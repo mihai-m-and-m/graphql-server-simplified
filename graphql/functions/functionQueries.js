@@ -2,7 +2,7 @@
 
 const { GraphQLList, GraphQLNonNull } = require("graphql");
 const { getAllQueries } = require("../../data");
-const { types } = require("./functionTypes");
+const { getAllTypes } = require("./functionTypes");
 const { filters } = require("../types/filtersTypes");
 const { enumTypes } = require("../types/enumTypes");
 const { queriesResolvers } = require("../resolvers/resolversQueries");
@@ -17,34 +17,34 @@ const {
  Assign each field values and resolver for each key inside Query
 *****************************************************************/
 const setQueriesFields = (fieldName, protect) => {
-  fieldName.types === "list" &&
-    (fieldName.type = new GraphQLNonNull(
-      new GraphQLList(types[`${fieldName.target}Type`])
-    ));
+  let { types, arguments, target } = fieldName;
+  [target, nullTarget] = target.split("!");
+  [types, nullType] = types.split("!");
+  fieldName.target = target;
+  fieldName.types = types;
 
-  fieldName.types === "single" &&
-    (fieldName.type = types[`${fieldName.target}Type`]);
+  let queryType = getAllTypes[`${target}Type`];
+  const filter = filters[`${target}Search`];
 
-  fieldName.arguments &&
-    (fieldName.arguments = setArgsTypes(fieldName.arguments, fieldName.target));
+  if (nullTarget != undefined) queryType = new GraphQLNonNull(queryType);
 
-  fieldName.arguments.searchBy &&
-    (fieldName.arguments.searchBy.type = filters[`${fieldName.target}Search`]);
+  types.includes("list")
+    ? (fieldName.type = new GraphQLList(queryType))
+    : (fieldName.type = queryType);
 
-  fieldName.arguments.sortBy &&
-    (fieldName.arguments.sortBy.type = enumTypes.sort);
+  if (nullType != undefined)
+    fieldName.type = new GraphQLNonNull(fieldName.type);
+
+  arguments && (fieldName.args = setArgsTypes(arguments));
+  arguments.searchBy && (fieldName.args.searchBy.type = filter);
+  arguments.sortBy && (fieldName.args.sortBy.type = enumTypes.sort);
 
   fieldName.resolve = async (parent, args, context, info) => {
     protectQueryAndMutations(protect, context);
     return queriesResolvers(parent, args, context, info, fieldName);
   };
 
-  const field = { type: fieldName.type };
-  fieldName.description && (field.description = fieldName.description);
-  fieldName.arguments && (field.args = fieldName.arguments);
-  fieldName.resolve && (field.resolve = fieldName.resolve);
-
-  return field;
+  return fieldName;
 };
 
 /*****************************************************************
@@ -52,15 +52,14 @@ const setQueriesFields = (fieldName, protect) => {
 *****************************************************************/
 let Query = new Map();
 for (let i = 0; i < getAllQueries.length; i++) {
-  let [queryName, queryValues] = getAllQueries[i];
+  let [queryName, fieldName] = getAllQueries[i];
   try {
     const protect = protectQueryAndMutationsFields(queryName);
     protect && (queryName = protect[0]);
-
-    Query.set(queryName, setQueriesFields(queryValues, protect));
+    Query.set(queryName, setQueriesFields(fieldName, protect));
   } catch (err) {
     errors_logs(err);
-    error_set("Queries", queryName + queryValues.name + err.message);
+    error_set("Queries", queryName + fieldName.name + err.message);
   }
 }
 Query = Object.fromEntries(Query);

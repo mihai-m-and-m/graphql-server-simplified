@@ -18,7 +18,7 @@
       { "name": "description", "types": "Str", "required": "true" },
       { "name": "countInStock", "types": "Int", "required": "true", "default": "1" },
       { "name": "productRating", "types": "Int", "default": "0" },
-      { "name": "reviewsIDs", "types": "list", "ref": "reviews", "field": "productID" }
+      { "name": "reviewsIDs", "types": "list", "ref": "reviews", "field": "productID", "required": "true" }
     ],
     "orders": [
       { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
@@ -72,10 +72,10 @@
       "target": "products"
     },
     "getProducts": {
-      "types": "list",
+      "types": "list!",
       "description": "Get all or a list of orders based on arguments",
       "arguments": { "_id": "list", "searchBy": "searchBy" },
-      "target": "products"
+      "target": "products!"
     },
     "getOrder__auth": {
       "types": "single",
@@ -96,10 +96,10 @@
       "target": "reviews"
     },
     "getReviews__auth": {
-      "types": "list",
+      "types": "list!",
       "description": "Get all or a list of reviews based on arguments",
       "arguments": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
-      "target": "reviews"
+      "target": "reviews!"
     }
   },
   "Mutations": {
@@ -107,7 +107,7 @@
       "target": "users",
       "arguments": { "username": "Str!", "email": "email!", "password": "encrypt!" },
       "checksF": [ { "users": ["email__select"] } ],
-      "saving": { "users": ["save"] }
+      "savings": { "users": ["save"] }
     },
     "login": {
       "target": "auth__noDB",
@@ -119,19 +119,19 @@
       "target": "reviews",
       "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
       "checksT": [ { "users": ["userID__id"] }, { "products": ["productID__id"] } ],
-      "saving": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
+      "savings": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
     },
     "createCategory__adminlevel__1": {
       "target": "category",
       "arguments": { "name": "Str!", "productIDs": "list" },
       "checksF": [ { "category": ["name"] } ],
-      "saving": { "category": ["save"] }
+      "savings": { "category": ["save"] }
     },
     "productregister__adminlevel__3": {
       "target": "products",
       "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
       "checksT": [ { "users": ["id"] }, { "category": ["productID"] } ],
-      "saving": { "products": ["save"] }
+      "savings": { "products": ["save"] }
     }
   }
 }
