@@ -37,7 +37,6 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
       let start = (page - 1) * perPage;
       let end = page * perPage;
       if (!result[0]) return [];
-      console.log(result);
       const data = result.map((i) => i.ids);
       return data.slice(start, end);
     }
