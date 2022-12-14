@@ -117,20 +117,21 @@
     },
     "createReviews__auth": {
       "target": "reviews",
-      "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
-      "checksT": [ { "users": ["userID__id"] }, { "products": ["productID__id"] } ],
-      "savings": [ { "reviews": ["save"] } ]
+      "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!", "userID": "jwt__id" },
+      "checksT": [ { "users": ["userID"] }, { "products": ["productID"] } ],
+	  "savings": [ { "reviews": ["save"] }, { "users": ["reviewsIDs"] }, { "products": ["reviewsIDs"] } ]
     },
     "createCategory__adminlevel__1": {
       "target": "category",
-      "arguments": { "name": "Str!", "productIDs": "list" },
+      "arguments": { "name": "Str!", "productsIDs": "list" },
       "checksF": [ { "category": ["name"] } ],
+	  "checksT": [ { "products": ["productsIDs"] } ],
       "savings": [ { "category": ["save"] }, { "products": ["categoryIDs"] } ]
     },
-    "productregister__adminlevel__3": {
+    "productRegister__adminlevel__3": {
       "target": "products",
-      "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int", "userID": "jwt__id" },
-      "checksT": [ { "users": ["userID__id"] }, { "category": ["categoryIDs__id"] } ],
+      "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
+      "checksT": [  { "category": ["categoryIDs"] } ],
       "savings": [ { "products": ["save"] }, { "category": ["productsIDs"] } ]
     }
   }

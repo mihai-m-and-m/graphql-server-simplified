@@ -14,7 +14,7 @@ const findAllInDB = async (dbTable, dbFields) => {
   try {
     return await models[dbTable].find().select(dbFields);
   } catch (err) {
-    error_set("checkExisting_true", dbTable);
+    error_set("default", dbTable);
   }
 };
 
@@ -40,7 +40,7 @@ const findWithArgsInDB = async (dbTable, arguments, dbFields, subFields) => {
   try {
     return await models[dbTable].find({ $and: values }).select(dbFields);
   } catch (err) {
-    error_set("checkExisting_true", dbTable);
+    error_set("default", dbTable);
   }
 };
 
@@ -57,7 +57,7 @@ const findInDB = async (dbTable, idValue, dbFields) => {
       .find({ _id: { $in: idValue } })
       .select(dbFields);
   } catch (err) {
-    error_set("checkExisting_true", idValue);
+    error_set("default", idValue);
   }
 };
 
@@ -77,7 +77,7 @@ const findIdInDB = async (dbTable, idValue) => {
         return await models[dbTable].findById(idValue);
     }
   } catch (err) {
-    error_set("checkExisting_true", idValue);
+    error_set("default", idValue);
   }
 };
 
@@ -94,7 +94,7 @@ const findOneInDB = async (dbTable, dbField, argsValue, encryptedFields) => {
   try {
     return await models[dbTable].findOne(find).select(encryptedFields);
   } catch (err) {
-    error_set("checkExisting_true", dbTable);
+    error_set("default", dbTable);
   }
 };
 
@@ -105,11 +105,13 @@ const findOneInDB = async (dbTable, dbField, argsValue, encryptedFields) => {
  * @returns Promise with data created from database
  */
 const saveInDB = async (dbTable, argsValues) => {
+  let result;
   try {
-    return await new models[dbTable](argsValues).save();
+    result = await new models[dbTable](argsValues).save();
   } catch (err) {
-    error_set("checkExisting_true", dbTable);
+    error_set("default", dbTable);
   }
+  return result;
 };
 
 /******************************************
@@ -122,12 +124,13 @@ const saveInDB = async (dbTable, argsValues) => {
  * TODO: updates for specific fields and values
  */
 const updateInDB = async (dbTable, updateField, updateObj, savedObj) => {
+  let result;
   try {
-    const result = await findIdInDB(dbTable, updateObj[dbTable]._id);
+    result = await findIdInDB(dbTable, updateObj[dbTable]._id);
     result[updateField].push(savedObj._id);
     await result.save();
   } catch (err) {
-    error_set("checkExisting_true", dbTable);
+    error_set("default", dbTable);
   }
   return savedObj;
 };

@@ -36,7 +36,7 @@ const mutationResolver = async (mutation, parent, args, req) => {
 
   const argsObj = await argumentsFunction(arguments, args, req);
   if (checksF) await checkFalseFunction(checksF, args);
-  if (checksT) checks = await checkTrueFunction(checksT, argsObj);
+  if (checksT) checks = await checkTrueFunction(checksT, argsObj, req);
   const [result, JWTFields] = checks;
   if (savings) returnedObj = await saveFunction(savings, argsObj, result);
   if (returns) returnedObj = await returnFunction(returns, result, JWTFields);

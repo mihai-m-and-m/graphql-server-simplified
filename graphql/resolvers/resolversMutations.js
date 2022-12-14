@@ -11,6 +11,7 @@ const {
   saveInDB,
   updateInDB,
   findIdInDB,
+  findInDB,
 } = require("../../db/dbQuery");
 const { settings } = require("../../settings");
 const db_type = settings.database;
@@ -71,52 +72,79 @@ const checkFalseFunction = async (checksF, args) => {
  * @param {Arguments} argsObj
  * @returns
  */
-const checkTrueFunction = async (checksT, argsObj) => {
+const checkTrueFunction = async (checksT, argsObj, req) => {
   let JWTFields = {};
   let result = {};
   for (const checkTrue of checksT) {
-    const tableName = Object.keys(checkTrue);
-    const fields = Object.values(checkTrue);
+    const [tableName] = Object.keys(checkTrue);
+    const [fields] = Object.values(checkTrue);
 
     let encryptedFields = ["_id"];
     let findField;
     let getField;
 
     for (const field of fields) {
-      const [fieldName, encryptedType, JWT] = field.split("__");
-      encryptedFields.push(fieldName);
-      getField = fieldName;
-      if (encryptedType && encryptedType.includes("id")) {
-        findField = await findIdInDB(tableName, argsObj[fieldName]);
-        !findField && error_set("checkExisting_true", fieldName);
-      }
-    }
+      let getField = field;
+      let [fieldName, encryptedType, JWT] = field.split("__");
 
-    /*** search for item, based on first value  ***/
-    if (!fields[0].includes("id")) {
       findField = await findOneInDB(
         tableName,
         fields[0],
         argsObj[fields[0]],
-        encryptedFields
+        `${fieldName} _id`
       );
+
+      if (encryptedType) {
+        if (encryptedType.includes("jwt")) {
+          getField = req.token[fieldName] || req.token.info[fieldName];
+          findField = await findInDB(tableName, getField, fieldName);
+          !findField && error_set("checkExisting_true", fieldName);
+        }
+
+        if (encryptedType.includes("decrypt")) {
+          const result = await bcrypt.compare(
+            argsObj[fieldName],
+            findField[fieldName]
+          );
+          !result && error_set("checkExisting_true", fieldName);
+        }
+      }
+
+      if (JWT) JWTFields[fieldName] = findField[fieldName];
+
+      // encryptedFields.push(fieldName);
+      // getField = fieldName;
+      // if (encryptedType && encryptedType.includes("id")) {
+      //   findField = await findIdInDB(tableName, argsObj[fieldName]);
+      //   !findField && error_set("checkExisting_true", fieldName);
+      // }
     }
 
-    !findField && error_set("checkExisting_true", fields[0]);
+    /*** search for item, based on first value  ***/
+    // if (!fields[0].includes("id")) {
+    //   findField = await findOneInDB(
+    //     tableName,
+    //     fields[0],
+    //     argsObj[fields[0]],
+    //     encryptedFields
+    //   );
+    // }
+
+    // !findField && error_set("checkExisting_true", fields[0]);
 
     if (db_type === "mysql") {
       result[tableName] = { ...findField };
       result[getField] = findField;
     } else result[tableName] = { ...findField._doc };
 
-    for (const element of fields) {
-      const [field, encryptedType, JWT] = element.split("__");
-      if (JWT) JWTFields[field] = findField[field];
-      if (encryptedType && encryptedType.includes("decrypt")) {
-        const compare = await bcrypt.compare(argsObj[field], findField[field]);
-        !compare && error_set("checkExisting_true", field);
-      }
-    }
+    // for (const element of fields) {
+    //   const [field, encryptedType, JWT] = element.split("__");
+    //   if (JWT) JWTFields[field] = findField[field];
+    //   if (encryptedType && encryptedType.includes("decrypt")) {
+    //     const compare = await bcrypt.compare(argsObj[field], findField[field]);
+    //     !compare && error_set("checkExisting_true", field);
+    //   }
+    // }
   }
 
   return [result, JWTFields];
@@ -139,7 +167,6 @@ const saveFunction = async (saver, argsObj, result) => {
       if (fields.length === 1 && fields.includes("save")) {
         obj = await saveInDB(table, argsObj);
       } else {
-        // console.log(obj);
         obj = await updateInDB(table, fields, result, obj);
       }
     } catch (err) {

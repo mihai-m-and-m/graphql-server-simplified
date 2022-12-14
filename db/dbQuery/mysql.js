@@ -87,7 +87,7 @@ const findAllInDB = async (dbTable, dbFields) => {
   try {
     return await getFunctionFromDatabase(dbTable, dbFields);
   } catch (err) {
-    error_set("checkExisting_true", dbTable);
+    error_set("default", dbTable);
   }
 };
 
@@ -114,23 +114,23 @@ const findWithArgsInDB = async (dbTable, arguments, dbFields, subFields) => {
   try {
     return await getFunctionFromDatabase(dbTable, dbFields, values);
   } catch (err) {
-    error_set("checkExisting_true", dbTable);
+    error_set("default", dbTable);
   }
 };
 
 /******************************************************************
  ** Function used for nested query to get data with id's of parent
- * @param {String} refName Database table name
+ * @param {String} dbTable Database table name
  * @param {Array} ids Array of ID's
  * @param {String} dbFields String with multiple fields separeted with space
  * @returns Promise with all data retrived from database
  */
-const findInDB = async (refName, ids, dbFields) => {
+const findInDB = async (dbTable, ids, dbFields) => {
   const values = { _id: ids.map((i) => i).flat() };
   try {
-    return await getFunctionFromDatabase(refName, dbFields, values);
+    return await getFunctionFromDatabase(dbTable, dbFields, values);
   } catch (err) {
-    error_set("checkExisting_true", refName);
+    error_set("default", dbTable);
   }
 };
 
@@ -152,7 +152,7 @@ const findIdInDB = async (dbTable, idValue) => {
       order: defaultOrder,
     });
   } catch (err) {
-    error_set("checkExisting_true", idValue);
+    error_set("default", idValue);
   }
 };
 
@@ -177,7 +177,7 @@ const findOneInDB = async (dbTable, dbField, argsValue, encryptedFields) => {
       attributes: encryptedFields, // selected fields
     });
   } catch (err) {
-    error_set("checkExisting_true", dbField);
+    error_set("default", dbField);
   }
 };
 
@@ -193,7 +193,7 @@ const saveInDB = async (dbTable, argsValues) => {
       .create(argsValues)
       .then((response) => response.get({ plain: true }));
   } catch (err) {
-    error_set("checkExisting_true", dbTable);
+    error_set("default", dbTable);
   }
 };
 
@@ -221,16 +221,16 @@ const updateInDB = async (dbTable, fields, checkedResponse, savedObj) => {
   try {
     await sequelize.models[dbTable].bulkCreate(multipleInserts);
   } catch (err) {
-    error_set("checkExisting_true", dbTable);
+    error_set("default", dbTable);
   }
   savedObj[field2] = updatedResult;
   return savedObj;
 };
 
 module.exports = {
-  findOneInDB,
   saveInDB,
   updateInDB,
+  findOneInDB,
   findIdInDB,
   findInDB,
   findAllInDB,
