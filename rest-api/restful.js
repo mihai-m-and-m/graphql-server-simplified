@@ -1,7 +1,6 @@
-/******** FILE FORMAT 
-1. TODO 
-********/
-
+/*********************
+ * TODO: NOT YET DONE *
+ **********************/
 const { graphqlHTTP } = require("express-graphql");
 const express = require("express");
 const server = express();

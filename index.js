@@ -1,10 +1,14 @@
-/******** Set Connections to database and start Backend Server ********/
-
+/**********************************************************
+ ** Set Connections to database and start Backend Server **
+ **********************************************************/
 const dotenv = require("dotenv");
 const { settings } = require("./settings");
 const { error_set } = require("./errors/error_logs");
 dotenv.config();
 
+/**********************************
+ ** Set Database type and connect
+ */
 async function database() {
   try {
     if (settings.database) {
@@ -16,6 +20,9 @@ async function database() {
   }
 }
 
+/*********************
+ ** Set Backend type
+ */
 async function backend() {
   let api_server;
   if (settings.backend === "graphql") {
@@ -26,6 +33,9 @@ async function backend() {
   }
 }
 
+/****************
+ ** Start server
+ */
 const server = async () => {
   try {
     await backend();

@@ -1,17 +1,84 @@
-/* 
-
-First step is to rename .env.RENAME file to .env and to set databasse connection
-Second step change the next settings as you wish.
-
-*/
+/**
+ *! First step is to rename .env.RENAME file to .env and to set databasse connection.
+ *! Second step change the following settings as you wish.
+ **/
 
 const settings = {
-  data: "./data.json", // File location to define all Schema/Query/Mutation
-  database: "mongodb", // mongodb or TODO mysql
-  backend: "graphql", // graphql API or TODO REST API
-  timeStamp: true, // only avalaible for mongodb
-  graphiql: true, // Show graphiQL Interface to test endpoint on localhost
-  graphqlDepthLimit: 10, // GraphQL Depth Limit (how deep you are alowed to query)
+  /*****************************
+   *! General server settings !*
+   *****************************/
+
+  /**
+   ** File location to define all Schema/Query/Mutation
+   */
+  data: "./data.json",
+
+  /**
+   ** Database type
+   * @param mongodb
+   * @param mysql
+   */
+  database: "mongodb",
+
+  /**
+   ** Backend server type
+   * @param graphql
+   * TODO: @param REST API
+   */
+  backend: "graphql",
+
+  /**
+   ** 'createdAt' and 'updatedAt' fields
+   * @param Boolean
+   * ? true/false
+   */
+  timeStamp: true,
+
+  /*****************************
+   *! GraphQL server settings !*
+   *****************************/
+
+  /**
+   ** Show GraphiQL Interface to test endpoint
+   *! Recomanded to be disabled in production
+   * @param Boolean
+   *  true / false
+   */
+  graphiql: true,
+
+  /**
+   ** GraphQL Depth Limit
+   * How deep you are alowed to query, number of nested fields
+   * @param Integer
+   */
+  graphqlDepthLimit: 5,
+
+  /********************
+   *! MySQL settings !*
+   ********************/
+
+  /**
+   ** MySQL database synchronize
+   * @param false - disable database synchronize
+   * @param `alter` - will alter all tabels and recreate them
+   * @param `force` - will drop all tabels and recreate them
+   * @param `tableName` - name of specific table you want to synchronize
+   */
+  databaseSync: false,
+
+  /**
+   ** SQL optimize
+   * @param selections - get selected fields from database
+   * @param caching - cache data from the same request
+   */
+  sqlOptimize: "caching",
+
+  /**
+   ** SQL database logging
+   * @param false - disable sql logging
+   * @param console.log - logging show in console
+   */
+  sqlLogging: console.log,
 };
 
 module.exports = { settings };

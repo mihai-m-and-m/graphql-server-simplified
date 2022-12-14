@@ -1,21 +1,28 @@
-/******** Mutations resolvers ********/
+/*************************
+ ** Mutations resolvers **
+ *************************/
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../../utils/jsonwebtoken");
 const { encrypt } = require("../../utils/encrypt");
-const { validEmail } = require("../../utils/data_formats");
+const { validEmail } = require("../../utils/dataFormats");
 const { error_set, errors_logs } = require("../../errors/error_logs");
-
-const { models } = require("../functions/functionModels");
 const {
-  find_one_in_database,
-  save_in_database,
-  update_in_database,
-  find_by_id,
-} = require("../../db/db_query");
+  findOneInDB,
+  saveInDB,
+  updateInDB,
+  findIdInDB,
+} = require("../../db/dbQuery");
+const { settings } = require("../../settings");
+const db_type = settings.database;
 
-/*********************************************************************
-Check every argument from mutation and assign to new object "argsObj"
-*********************************************************************/
+/************************************************************************
+ ** Check every argument from mutation and assign to new object "argsObj"
+ * @param {Arguments} arguments
+ * @param {ArgsFromMutation} args
+ * @param {*} req
+ * @param {*} argsObj
+ * @returns
+ */
 const argumentsFunction = async (arguments, args, req, argsObj = {}) => {
   const arg = Object.entries(arguments);
   for (const [argName, argType] of arg) {
@@ -38,60 +45,71 @@ const argumentsFunction = async (arguments, args, req, argsObj = {}) => {
 };
 
 /*********************************************************************
-Check every field from "checksF" (checkFalse) if exist throw error
-*********************************************************************/
-const checkFalseFunction = async (checksF, args, findField, fieldError) => {
+ ** Check every field from "checksF" (checkFalse) if exist throw error
+ * @param {Array} checksF
+ * @param {Arguments} args
+ */
+const checkFalseFunction = async (checksF, args) => {
+  let findField = {};
+  let fieldError = {};
   for (const checkFalse of checksF) {
     const [[modelName, fields]] = Object.entries(checkFalse);
     for (const fieldAndProperty of fields) {
       const [field, property] = fieldAndProperty.split("__");
-      let encryptedField;
+      let encrypt;
       fieldError = field;
-      if (property) encryptedField = field;
-
-      findField = await find_one_in_database(
-        models[modelName],
-        field,
-        args[field],
-        encryptedField
-      );
+      if (property) encrypt = field;
+      findField = await findOneInDB(modelName, field, args[field], encrypt);
     }
   }
   findField && error_set("checkExisting_false", args[fieldError]);
 };
 
-/*********************************************************************
-Check every object from "checksT" (checkTrue) if not exist throw error
-*********************************************************************/
-const checkTrueFunction = async (checksT, argsObj, result = {}) => {
+/*************************************************************************
+ ** Check every object from "checksT" (checkTrue) if not exist throw error
+ * @param {Array} checksT
+ * @param {Arguments} argsObj
+ * @returns
+ */
+const checkTrueFunction = async (checksT, argsObj) => {
   let JWTFields = {};
+  let result = {};
   for (const checkTrue of checksT) {
-    const [[tableName, values]] = Object.entries(checkTrue);
-    let encryptedFields = [];
-    let findField;
+    const tableName = Object.keys(checkTrue);
+    const fields = Object.values(checkTrue);
 
-    for (const element of values) {
-      const [field, encryptedType, JWT] = element.split("__");
-      encryptedFields.push(field);
+    let encryptedFields = ["_id"];
+    let findField;
+    let getField;
+
+    for (const field of fields) {
+      const [fieldName, encryptedType, JWT] = field.split("__");
+      encryptedFields.push(fieldName);
+      getField = fieldName;
       if (encryptedType && encryptedType.includes("id")) {
-        findField = await find_by_id(models[tableName], argsObj[field]);
-        !findField && error_set("checkExisting_true", field);
+        findField = await findIdInDB(tableName, argsObj[fieldName]);
+        !findField && error_set("checkExisting_true", fieldName);
       }
     }
+
     /*** search for item, based on first value  ***/
-    if (!values[0].includes("id")) {
-      findField = await find_one_in_database(
-        models[tableName],
-        values[0],
-        argsObj[values[0]],
+    if (!fields[0].includes("id")) {
+      findField = await findOneInDB(
+        tableName,
+        fields[0],
+        argsObj[fields[0]],
         encryptedFields
       );
     }
 
-    !findField && error_set("checkExisting_true", values[0]);
-    result[tableName] = { ...findField._doc };
+    !findField && error_set("checkExisting_true", fields[0]);
 
-    for (const element of values) {
+    if (db_type === "mysql") {
+      result[tableName] = { ...findField };
+      result[getField] = findField;
+    } else result[tableName] = { ...findField._doc };
+
+    for (const element of fields) {
       const [field, encryptedType, JWT] = element.split("__");
       if (JWT) JWTFields[field] = findField[field];
       if (encryptedType && encryptedType.includes("decrypt")) {
@@ -104,36 +122,44 @@ const checkTrueFunction = async (checksT, argsObj, result = {}) => {
   return [result, JWTFields];
 };
 
-/*********************************************
-Save in database every "saving" from mutations
-**********************************************/
-const saveFunction = async (saver, argsObj, result, obj = {}) => {
-  const saverMap = new Map(Object.entries(saver));
-  for (const [tableName, save] of saverMap) {
-    if (save.includes("save"))
-      obj = await save_in_database(models[tableName], argsObj);
-    if (obj)
-      save.map(async (saving) => {
-        const [tableName, field] = saving.split("__");
-        if (field)
-          obj = await update_in_database(
-            models[tableName],
-            tableName,
-            field,
-            result,
-            obj
-          );
-      });
-    if (!obj) error_set("checkExisting_true", argsObj);
-    return obj;
+/**************************************************
+ ** Save in database every "saving" from mutations
+ * @param {OBJECT} saver
+ * @param {OBJECT} argsObj
+ * @param {PREVIOUS_RESULT} result
+ * @returns
+ * TODO: double check the obj and updateInDB function
+ */
+const saveFunction = async (saver, argsObj, result) => {
+  let obj = {};
+  for (const save of saver) {
+    const [table] = Object.keys(save);
+    const [fields] = Object.values(save);
+    try {
+      if (fields.length === 1 && fields.includes("save")) {
+        obj = await saveInDB(table, argsObj);
+      } else {
+        // console.log(obj);
+        obj = await updateInDB(table, fields, result, obj);
+      }
+    } catch (err) {
+      error_set("checkExisting_true", fields);
+    }
   }
+  if (!obj) error_set("checkExisting_true", argsObj);
+  return obj;
 };
 
-/*********************************************
-Return special "return" fields from mutations
-**********************************************/
+/**************************************************
+ ** Return special "return" fields from mutations
+ * @param {OBJECT} returns
+ * @param {PREVIOUS_RESULT} result
+ * @param {JsonWebToken} JWTFields
+ * @returns
+ */
 const returnFunction = (returns, result, JWTFields) => {
   const returnedObj = new Map();
+
   Object.entries(returns).map(([field, value]) => {
     const [tableName, tableField, token] = value.split("__");
     if (tableName.includes("tokenExp"))

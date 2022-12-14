@@ -1,10 +1,13 @@
-/******** Define Query and Mutations ********/
-
+/********************************
+ ** Define Query and Mutations **
+ ********************************/
 const { GraphQLSchema, GraphQLObjectType } = require("graphql");
 const { Query } = require("./functions/functionQueries");
 const { setAllMutations } = require("./functions/FunctionMutations");
 
-// Define GraphQL SCHEMA
+/*************************
+ ** Define GraphQL SCHEMA
+ */
 const graphQLSchema = new GraphQLSchema({
   query: new GraphQLObjectType({
     name: "Queries",

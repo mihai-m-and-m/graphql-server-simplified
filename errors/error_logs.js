@@ -1,9 +1,22 @@
-/******** Error handling ********/
+/********************
+ ** Error handling **
+ ********************/
 
+/******************
+ ** Logging errors
+ * @param {ERROR} err
+ * TODO: store errors into .txt file
+ */
 const errors_logs = (err) => {
   //console.log(err);
 };
 
+/******************
+ ** Throw Errors
+ * @param {STRING} text
+ * @param {ERROR} args
+ * TODO: IMPROVE ERROR HANDLING
+ */
 const error_set = (text, args) => {
   const color = "\x1b[31m";
   switch (text) {

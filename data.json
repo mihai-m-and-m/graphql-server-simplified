@@ -59,7 +59,7 @@
       "arguments": { "_id": "ID", "username": "Str", "email": "Str" },
       "target": "users"
     },
-    "getUsers__adminlevel__1": {
+    "getUsers__auth": {
       "types": "list",
       "description": "Get all users if no argument or a list of users based on argument/s",
       "arguments": { "username": "Str", "searchBy": "searchBy" },
@@ -107,7 +107,7 @@
       "target": "users",
       "arguments": { "username": "Str!", "email": "email!", "password": "encrypt!" },
       "checksF": [ { "users": ["email__select"] } ],
-      "savings": { "users": ["save"] }
+      "savings": [ { "users": ["save"] } ]
     },
     "login": {
       "target": "auth__noDB",
@@ -119,19 +119,19 @@
       "target": "reviews",
       "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
       "checksT": [ { "users": ["userID__id"] }, { "products": ["productID__id"] } ],
-      "savings": { "reviews": ["save", "users__reviewsIDs", "products__reviewsIDs"] }
+      "savings": [ { "reviews": ["save"] } ]
     },
     "createCategory__adminlevel__1": {
       "target": "category",
       "arguments": { "name": "Str!", "productIDs": "list" },
       "checksF": [ { "category": ["name"] } ],
-      "savings": { "category": ["save"] }
+      "savings": [ { "category": ["save"] }, { "products": ["categoryIDs"] } ]
     },
     "productregister__adminlevel__3": {
       "target": "products",
-      "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
-      "checksT": [ { "users": ["id"] }, { "category": ["productID"] } ],
-      "savings": { "products": ["save"] }
+      "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int", "userID": "jwt__id" },
+      "checksT": [ { "users": ["userID__id"] }, { "category": ["categoryIDs__id"] } ],
+      "savings": [ { "products": ["save"] }, { "category": ["productsIDs"] } ]
     }
   }
 }

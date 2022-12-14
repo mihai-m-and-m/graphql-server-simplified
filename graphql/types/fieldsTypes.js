@@ -1,23 +1,27 @@
-/******** Define all the Types for API ********/
-
+/**********************************
+ ** Define all the Types for API **
+ **********************************/
 const {
   GraphQLString,
   GraphQLInt,
   GraphQLID,
-  GraphQLList,
   GraphQLFloat,
   GraphQLBoolean,
+  GraphQLList,
   GraphQLNonNull,
 } = require("graphql");
 const { error_set, errors_logs } = require("../../errors/error_logs");
 const { resolverDateFormat } = require("../resolvers/resolversDate");
-const { dateScalar } = require("../../utils/data_formats");
+const { dateScalar } = require("../../utils/dataFormats");
 const { dateFormatEnum } = require("./enumTypes");
 
-/****************************************************************************************
- Configure types for fields inside filters (searchBy, sortBy)
- Configure types for arguments of mutations fields used by below "setArgsTypes" function 
-*****************************************************************************************/
+/**********************************************************************************************
+ ** Configure types for fields inside filters (searchBy, sortBy)
+ ** Configure types for arguments of mutations fields used by below "setArgsTypes" function
+ * @param {Field} fieldType
+ * @param {*} type
+ * @returns
+ */
 const setTypes = (fieldType, type = {}) => {
   const stringType = ["Str", "email", "encrypt", "jwt"];
   const idType = ["ID", "single", "__id"];
@@ -34,9 +38,9 @@ const setTypes = (fieldType, type = {}) => {
   return type;
 };
 
-/******************************************************************
- Configure Time Stamp for each field of the Schema
-*******************************************************************/
+/******************************************************
+ ** Configure Time Stamp for each field of the Schema
+ */
 const setTimeStamp = () => {
   return {
     createdAt: {
@@ -57,18 +61,20 @@ const setTimeStamp = () => {
 };
 
 /******************************************************************
- Configure nested query fields for pagination only for "list" type
- page: number of page
- perPage: number of items per page (Default 25)
-*******************************************************************/
+ ** Configure nested query fields for pagination only for "list" type
+ *? page: number of page
+ *? perPage: number of items per page (Default 25)
+ *******************************************************************/
 const setPaginationFields = () => {
   return { page: { type: GraphQLInt }, perPage: { type: GraphQLInt } };
 };
 
-/**************************************************
- Configure types for arguments of mutations fields 
- Configure types for arguments of query fields 
-***************************************************/
+/********************************************************
+ ** Configure types for arguments of mutations fields
+ ** Configure types for arguments of query fields
+ * @param {OBJECT} object
+ * @returns
+ */
 const setArgsTypes = (object) => {
   const types = Object.entries(object);
   let obj = {};

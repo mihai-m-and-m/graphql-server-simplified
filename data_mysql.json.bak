@@ -62,7 +62,7 @@
     "getUsers__auth": {
       "types": "list",
       "description": "Get all users if no argument or a list of users based on argument/s",
-      "arguments": { "username": "Str", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "username": "Str", "searchBy": "searchBy" },
       "target": "users"
     },
     "getProduct__auth": {
@@ -117,21 +117,22 @@
     },
     "createReviews__auth": {
       "target": "reviews",
-      "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!",  "userID": "jwt__id" },
+      "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!", "userID": "jwt__id" },
       "checksT": [ { "users": ["userID__id"] }, { "products": ["productID__id"] } ],
       "savings": [ { "reviews": ["save"] } ]
     },
     "createCategory__adminlevel__1": {
       "target": "category",
-      "arguments": { "name": "Str!", "productIDs": "list" },
+      "arguments": { "name": "Str!", "productsIDs": "list" },
       "checksF": [ { "category": ["name"] } ],
-      "savings": [ { "category": ["save"] } ]
+	  "checksT": [ { "products": ["productsIDs__id"] } ],
+      "savings": [ { "category": ["save"] }, { "products_category": [ "categoryIDs", "productsIDs"] } ]
     },
-    "productregister__adminlevel__3": {
+    "productRegister__adminlevel__3": {
       "target": "products",
-      "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int", "userID": "jwt__id" },
+      "arguments": { "name": "Str!", "categoryIDs": "list!", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int", "userID": "jwt__id" },
       "checksT": [ { "users": ["userID__id"] }, { "category": ["categoryIDs__id"] } ],
-      "savings": [ { "products": ["save"] }, { "category": [ "productsIDs"] } ]
+      "savings": [ { "products": ["save"] }, { "products_category": [ "productsIDs", "categoryIDs"] } ]
     }
   }
 }

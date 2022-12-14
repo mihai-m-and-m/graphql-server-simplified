@@ -1,5 +1,6 @@
-/******** Secure encryption using bcryptjs ********/
-
+/**************************************
+ ** Secure encryption using bcryptjs **
+ **************************************/
 const bcrypt = require("bcryptjs");
 
 const encrypt = async (password) => {

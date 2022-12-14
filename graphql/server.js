@@ -1,31 +1,36 @@
-/******** Make Server running using express ********/
-
+/***************************************
+ ** Make Server running using express **
+ ***************************************/
 const { graphqlHTTP } = require("express-graphql");
 const express = require("express");
 const cors = require("cors");
 const depthLimit = require("graphql-depth-limit");
-const { obj_loader } = require("./functions/functionDataLoader");
-const { auth } = require("../middleware/authMiddleware");
+const { loaderMiddleware } = require("../middleware/loaderMiddleware");
+const { authMiddleware } = require("../middleware/authMiddleware");
 const { settings } = require("../settings");
 const { graphQLSchema } = require("./schema");
 const server = express();
 
-const PORT = process.env.SERVER_PORT || 3000;
+const HOST = process.env.SERVER_HOST || "http://localhost";
+const PORT = process.env.SERVER_PORT || 5000;
 const ENDPOINT = process.env.GRAPHQL_ENDPOINT || "/graphql";
-
-server.use(cors());
-server.use(express.json());
-server.use(auth);
-server.use(obj_loader);
 
 server.use(
   ENDPOINT,
-  graphqlHTTP({
-    schema: graphQLSchema,
-    graphiql: settings.graphiql,
-    validationRules: [depthLimit(settings.graphqlDepthLimit)],
+  cors(),
+  express.json(),
+  authMiddleware,
+  loaderMiddleware,
+  graphqlHTTP(() => {
+    let enableGraphiql = false;
+    if (settings.graphiql) enableGraphiql = { headerEditorEnabled: true };
+    return {
+      schema: graphQLSchema,
+      graphiql: enableGraphiql,
+      validationRules: [depthLimit(settings.graphqlDepthLimit)],
+    };
   })
 );
 
 server.listen(PORT);
-console.log(`Backend running at http://localhost:${PORT}${ENDPOINT} End-Point`);
+console.log(`Backend running at ${HOST}:${PORT}${ENDPOINT} End-Point`);

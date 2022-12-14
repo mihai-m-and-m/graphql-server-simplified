@@ -4,7 +4,7 @@ This is a work in progress any change at any time could be a braking change befo
 
 Get a full GraphQL API server with MongoDB (for now) database from a simple json file.
 
-This server includes `express, express-graphql, graphql, mongoose, cors, dataloader, dotenv, mysql2, graphql-depth-limit` packages as default.
+This server includes `express, express-graphql, graphql, mongoose, cors, dataloader, dotenv, graphql-depth-limit, sequelize, sqlite3` packages as default.
 
 Also using `bcryptjs` to encrypt special password field (or any other field if you wish) and `jsonwebtoken` to secure protect the server.
 

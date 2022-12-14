@@ -1,5 +1,6 @@
-/******** Generate jsonwebtoken ********/
-
+/***************************
+ ** Generate JsonWebToken **
+ ***************************/
 const jwt = require("jsonwebtoken");
 
 const generateToken = (id, info) => {

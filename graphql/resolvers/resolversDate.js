@@ -1,5 +1,6 @@
-/******** Define the resolver for "Date" type Fields ********/
-
+/************************************************
+ ** Define the resolver for "Date" type Fields **
+ ************************************************/
 const resolverDateFormat = (value, dateFormat = 4) => {
   if (!value) return;
   if (dateFormat === 0) return value.toLocaleDateString();

@@ -1,24 +1,22 @@
-/******** Define Filters ********/
-
+/********************
+ ** Define Filters **
+ * TODO:   q: { type: GraphQLString },  --------- quantity
+ * TODO: sortBy (any field) - Ascendent or Descendent
+ * ! ONLY FOR INT FIELDS
+ * TODO: views_lt: { type: GraphQLInt },--------- lowerThen
+ * TODO: views_lte: { type: GraphQLInt },--------- lowerOrEqualThen
+ * TODO: views_gt: { type: GraphQLInt },--------- graterThen
+ * TODO: views_gte: { type: GraphQLInt },--------- graterOrEqualThen
+ ********************/
 const { GraphQLInputObjectType } = require("graphql");
 const { getAllSchemas } = require("../../data");
 const { settings } = require("../../settings");
 const { setTypes } = require("./fieldsTypes");
 const { errors_logs, error_set } = require("../../errors/error_logs");
 
-/* TODO 
-  q: { type: GraphQLString },  --------- quantity
-  sortBy (any field) - Ascendent or Descendent
-  
-  ONLY FOR INT FIELDS
-  views_lt: { type: GraphQLInt },--------- lowerThen
-  views_lte: { type: GraphQLInt },--------- lowerOrEqualThen
-  views_gt: { type: GraphQLInt },--------- graterThen
-  views_gte: { type: GraphQLInt },--------- graterOrEqualThen
-*/
-/***********************************************************
- Special TimeStamps Input Object to define a range of Dates
- ***********************************************************/
+/***************************************************************
+ ** Special TimeStamps Input Object to define a range of Dates
+ */
 const TimeStampsType = new GraphQLInputObjectType({
   name: "TimeStamps",
   fields: {
@@ -36,14 +34,17 @@ const PaginationType = new GraphQLInputObjectType({
     "Special type to make `Date` scalar type human readable for example `YYYY-MM-DD`",
 });
 
-/***********************************************************
- Filter Query result based on provided filters in arguments
- ***********************************************************/
+/**************************************************************
+ ** Filter Query result based on provided filters in arguments
+ * @param {Field} fieldName
+ * @returns Object with property fields
+ */
 const filterFields = (fieldName) => {
   let timeStamp;
-  const field = Object.values(fieldName);
-  const result = field.map((item) => {
-    if (item.select) return;
+  const fields = Object.values(fieldName);
+  const result = fields.map((item) => {
+    if (item.select || item.types === "list") return;
+
     return { [item.name]: { type: setTypes(item.types) } };
   });
 
@@ -56,9 +57,11 @@ const filterFields = (fieldName) => {
   return Object.assign({}, ...result, timeStamp);
 };
 
-/***********************************************************
- Create Filter Input Object Type and save into "filters" obj
- ***********************************************************/
+/****************************************************************
+ ** Create Filter Input Object Type and save into "filters" obj
+ * @param {Schema} schema
+ * @returns
+ */
 const createFilterInput = (schema) => {
   let schemaName = schema[0];
   const fields = schema[1];
