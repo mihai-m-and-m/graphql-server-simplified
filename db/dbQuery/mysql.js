@@ -87,7 +87,7 @@ const findAllInDB = async (dbTable, dbFields) => {
   try {
     return await getFunctionFromDatabase(dbTable, dbFields);
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
 };
 
@@ -114,7 +114,7 @@ const findWithArgsInDB = async (dbTable, arguments, dbFields, subFields) => {
   try {
     return await getFunctionFromDatabase(dbTable, dbFields, values);
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
 };
 
@@ -130,7 +130,7 @@ const findInDB = async (dbTable, ids, dbFields) => {
   try {
     return await getFunctionFromDatabase(dbTable, dbFields, values);
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
 };
 
@@ -152,7 +152,7 @@ const findIdInDB = async (dbTable, idValue) => {
       order: defaultOrder,
     });
   } catch (err) {
-    error_set("default", idValue);
+    error_set("Internal database error", idValue);
   }
 };
 
@@ -177,7 +177,7 @@ const findOneInDB = async (dbTable, dbField, argsValue, encryptedFields) => {
       attributes: encryptedFields, // selected fields
     });
   } catch (err) {
-    error_set("default", dbField);
+    error_set("Internal database error", dbField);
   }
 };
 
@@ -193,7 +193,7 @@ const saveInDB = async (dbTable, argsValues) => {
       .create(argsValues)
       .then((response) => response.get({ plain: true }));
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
 };
 
@@ -221,7 +221,7 @@ const updateInDB = async (dbTable, fields, checkedResponse, savedObj) => {
   try {
     await sequelize.models[dbTable].bulkCreate(multipleInserts);
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
   savedObj[field2] = updatedResult;
   return savedObj;

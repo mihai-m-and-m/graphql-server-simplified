@@ -5,9 +5,9 @@ const { settings } = require("../../settings");
 const dbType = settings.database;
 
 const {
-  findOneInDB,
   saveInDB,
   updateInDB,
+  findOneInDB,
   findIdInDB,
   findInDB,
   findAllInDB,
@@ -15,9 +15,9 @@ const {
 } = require(`./${dbType}`);
 
 module.exports = {
-  findOneInDB,
   saveInDB,
   updateInDB,
+  findOneInDB,
   findIdInDB,
   findInDB,
   findAllInDB,

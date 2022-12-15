@@ -60,7 +60,7 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
     result = await context.dataloader[loaderName].loadMany(ids);
     /**
      * ! ONLY FOR MySQL
-     * ? "selections" will work if "sqlOptimize" is set to "selections" because of DataLoader caching second query of already used model
+     * ? "selections" will work if "sqlOptimize" is set to "selections" because of DataLoader caching, second query of already used model
      * ? with same "id's" will return "null" for the new nested selections fields if wasn't selected in first selection
      * ! choose between ".clearAll()" from below or "setFields = { exclude: [""] }" in "getFunctionFromDatabase" function from "db/dbQuery/mysql" file
      */
@@ -107,14 +107,8 @@ const queriesResolvers = async (parent, args, context, info, fieldName) => {
     arguments = Object.entries(args.searchBy);
   }
 
-  try {
-    if (arguments.length === 0) items = await findAllInDB(target, selection);
-    else
-      items = await findWithArgsInDB(target, arguments, selection, subfields);
-  } catch (err) {
-    errors_logs(err);
-    error_set("queriesResolvers", fieldName + err.message);
-  }
+  if (arguments.length === 0) items = await findAllInDB(target, selection);
+  else items = await findWithArgsInDB(target, arguments, selection, subfields);
 
   const result = items.map((item) => item);
   if (types === "single") return result[0];

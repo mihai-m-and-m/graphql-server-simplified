@@ -119,7 +119,7 @@
       "target": "reviews",
       "arguments": { "name": "Str!", "comment": "Str!", "productID": "ID!", "userID": "jwt__id" },
       "checksT": [ { "users": ["userID"] }, { "products": ["productID"] } ],
-	  "savings": [ { "reviews": ["save"] }, { "users": ["userID"] }, {"products":["productID"] } ]
+	  "savings": [ { "reviews": ["save"] }, { "users": ["reviewsIDs"] }, { "products": ["reviewsIDs"] } ]
     },
     "createCategory__adminlevel__1": {
       "target": "category",

@@ -79,20 +79,23 @@ const checkTrueFunction = async (checksT, argsObj, req) => {
     const [tableName] = Object.keys(checkTrue);
     const [fields] = Object.values(checkTrue);
 
-    let encryptedFields = ["_id"];
     let findField;
     let getField;
 
     for (const field of fields) {
-      let getField = field;
       let [fieldName, encryptedType, JWT] = field.split("__");
+      getField = field;
 
-      findField = await findOneInDB(
-        tableName,
-        fields[0],
-        argsObj[fields[0]],
-        `${fieldName} _id`
-      );
+      /*** search for item, based on first value  ***/
+      if (argsObj[fieldName] || encryptedType === "select") {
+        findField = await findOneInDB(
+          tableName,
+          fields[0],
+          argsObj[fields[0]],
+          `_id ${fieldName}`
+        );
+        !findField && error_set("checkExisting_true", fieldName);
+      }
 
       if (encryptedType) {
         if (encryptedType.includes("jwt")) {
@@ -102,49 +105,23 @@ const checkTrueFunction = async (checksT, argsObj, req) => {
         }
 
         if (encryptedType.includes("decrypt")) {
-          const result = await bcrypt.compare(
+          const verified = await bcrypt.compare(
             argsObj[fieldName],
             findField[fieldName]
           );
-          !result && error_set("checkExisting_true", fieldName);
+          !verified && error_set("checkExisting_true", fieldName);
         }
       }
 
       if (JWT) JWTFields[fieldName] = findField[fieldName];
-
-      // encryptedFields.push(fieldName);
-      // getField = fieldName;
-      // if (encryptedType && encryptedType.includes("id")) {
-      //   findField = await findIdInDB(tableName, argsObj[fieldName]);
-      //   !findField && error_set("checkExisting_true", fieldName);
-      // }
     }
-
-    /*** search for item, based on first value  ***/
-    // if (!fields[0].includes("id")) {
-    //   findField = await findOneInDB(
-    //     tableName,
-    //     fields[0],
-    //     argsObj[fields[0]],
-    //     encryptedFields
-    //   );
-    // }
-
-    // !findField && error_set("checkExisting_true", fields[0]);
 
     if (db_type === "mysql") {
       result[tableName] = { ...findField };
       result[getField] = findField;
-    } else result[tableName] = { ...findField._doc };
-
-    // for (const element of fields) {
-    //   const [field, encryptedType, JWT] = element.split("__");
-    //   if (JWT) JWTFields[field] = findField[field];
-    //   if (encryptedType && encryptedType.includes("decrypt")) {
-    //     const compare = await bcrypt.compare(argsObj[field], findField[field]);
-    //     !compare && error_set("checkExisting_true", field);
-    //   }
-    // }
+    } else {
+      result[tableName] = findField?._doc;
+    }
   }
 
   return [result, JWTFields];
@@ -163,15 +140,10 @@ const saveFunction = async (saver, argsObj, result) => {
   for (const save of saver) {
     const [table] = Object.keys(save);
     const [fields] = Object.values(save);
-    try {
-      if (fields.length === 1 && fields.includes("save")) {
-        obj = await saveInDB(table, argsObj);
-      } else {
-        obj = await updateInDB(table, fields, result, obj);
-      }
-    } catch (err) {
-      error_set("checkExisting_true", fields);
-    }
+
+    if (fields.length === 1 && fields.includes("save"))
+      obj = await saveInDB(table, argsObj);
+    if (result[table]) obj = await updateInDB(table, fields, result, obj);
   }
   if (!obj) error_set("checkExisting_true", argsObj);
   return obj;

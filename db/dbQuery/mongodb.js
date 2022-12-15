@@ -14,7 +14,7 @@ const findAllInDB = async (dbTable, dbFields) => {
   try {
     return await models[dbTable].find().select(dbFields);
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
 };
 
@@ -32,15 +32,20 @@ const findWithArgsInDB = async (dbTable, arguments, dbFields, subFields) => {
       if (!argValue.to) argValue.to = Date.now();
       argValue = { $gte: argValue.from, $lte: argValue.to };
     }
-    if (typeof argValue === "string")
+    if (typeof argValue === "string") {
       if (subFields[argName].type.name !== "ID")
-        argValue = { $regex: argValue, $options: "i" }; // case insensitive search
+        argValue = { $regex: argValue, $options: "i" };
+      else
+        !argValue.toString().match(/^[0-9a-fA-F]{24}$/) &&
+          error_set("Invalid ID", argValue);
+    }
     return { [argName]: argValue };
   });
+
   try {
     return await models[dbTable].find({ $and: values }).select(dbFields);
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
 };
 
@@ -57,7 +62,7 @@ const findInDB = async (dbTable, idValue, dbFields) => {
       .find({ _id: { $in: idValue } })
       .select(dbFields);
   } catch (err) {
-    error_set("default", idValue);
+    error_set("Internal database error", idValue);
   }
 };
 
@@ -77,7 +82,7 @@ const findIdInDB = async (dbTable, idValue) => {
         return await models[dbTable].findById(idValue);
     }
   } catch (err) {
-    error_set("default", idValue);
+    error_set("Internal database error", idValue);
   }
 };
 
@@ -94,7 +99,7 @@ const findOneInDB = async (dbTable, dbField, argsValue, encryptedFields) => {
   try {
     return await models[dbTable].findOne(find).select(encryptedFields);
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
 };
 
@@ -109,7 +114,7 @@ const saveInDB = async (dbTable, argsValues) => {
   try {
     result = await new models[dbTable](argsValues).save();
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
   return result;
 };
@@ -130,7 +135,7 @@ const updateInDB = async (dbTable, updateField, updateObj, savedObj) => {
     result[updateField].push(savedObj._id);
     await result.save();
   } catch (err) {
-    error_set("default", dbTable);
+    error_set("Internal database error", dbTable);
   }
   return savedObj;
 };

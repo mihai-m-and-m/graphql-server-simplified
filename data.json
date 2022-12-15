@@ -131,7 +131,7 @@
     "productRegister__adminlevel__3": {
       "target": "products",
       "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
-      "checksT": [  { "category": ["categoryIDs"] } ],
+      "checksT": [ { "category": ["categoryIDs"] } ],
       "savings": [ { "products": ["save"] }, { "category": ["productsIDs"] } ]
     }
   }
