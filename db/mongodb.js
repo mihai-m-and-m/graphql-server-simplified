@@ -1,10 +1,15 @@
-/******** MongoDB connection ********/
-
+/*********************************
+ ** MongoDB DATABASE CONNECTION **
+ *********************************/
 const { error_set } = require("../errors/error_logs");
 const mongoose = require("mongoose");
+
+/****************************
+ * Check Database connection
+ */
 const connectDB = async () => {
   try {
-    await mongoose.connect(
+    mongoose.connect(
       `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@${process.env.DB_HOST}/${process.env.DB_NAME}?retryWrites=true&w=majority`,
       {
         useUnifiedTopology: true,

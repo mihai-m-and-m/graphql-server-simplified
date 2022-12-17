@@ -1,5 +1,6 @@
-/******** Define EnumType ********/
-
+/**********************
+ ** Define EnumTypes **
+ **********************/
 const { GraphQLEnumType } = require("graphql");
 
 const sort = new GraphQLEnumType({

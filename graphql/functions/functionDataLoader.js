@@ -1,55 +1,45 @@
-/******** DataLoader for batching on each request ********/
-
-const DataLoader = require("dataloader");
-const { getAllSchemas } = require("../../data");
-const { models } = require("./functionModels");
-const { find_in_database } = require("../../db/db_query");
+/*********************************************
+ ** DataLoader for batching on each request **
+ *********************************************/
+const { findInDB } = require("../../db/dbQuery");
 const { errors_logs, error_set } = require("../../errors/error_logs");
+const { groupSQLList } = require("../../utils/groupResult");
 
-/******************************************************************************
- Batch all Ids and selected fields from Query and sort them after DB response
-******************************************************************************/
-const batchIdsAndSelections = async (idsAndSelections, ref) => {
-  const { selection } = idsAndSelections[0];
+/**************************************************************************************
+ ** Batch all IDs and selected fields from Query and sort them after database response
+ * @param {String} getIds
+ * @param {String} ref Database table name
+ * @returns Promise with all data retrived from database
+ * TODO: getDB result it's ok but "sort" and "groupSQLList" shuffle the result ordering by "getIds"
+ */
+const batchIds = async (getIds, ref, selection) => {
+  const getAllIds = [];
   const sort = {};
-  const allIds = [];
+
+  for (const getId of getIds) {
+    const id = getId.toString();
+    !Array.isArray(getId)
+      ? !getAllIds.includes(id) && getAllIds.push(id)
+      : getId.map((i) => {
+          const id = i.toString();
+          !getAllIds.includes(id) && getAllIds.push(id);
+        });
+  }
+  const ids = getAllIds.filter((i) => i);
 
   try {
-    for (const { ids } of idsAndSelections) {
-      ids[0] ? allIds.push(...ids) : allIds.push(ids);
-    }
+    const getDB = await findInDB(ref, ids, selection);
+    const groupedDB = groupSQLList(getDB);
+    groupedDB.forEach((element) => (sort[element._id] = element));
 
-    const getFromDB = await find_in_database(models[ref], allIds, selection);
-    getFromDB.forEach((element) => (sort[element.id] = element));
-
-    return idsAndSelections.map((key) => {
-      if (key.ids[0])
-        return key.ids.map((id) => ({ ids: sort[id.toString()], selection }));
-      return { ids: sort[key.ids.toString()], selection };
+    return getIds.map((key) => {
+      if (Array.isArray(key)) return key.map((id) => sort[id]);
+      return sort[key];
     });
   } catch (err) {
     errors_logs(err);
-    error_set("DataLoader", ref + allIds + err.message);
+    error_set("DataLoader", ref + ids + err.message);
   }
 };
 
-/******************************************************************
- Make for each request one Loader to proper handle database query's
-*******************************************************************/
-const obj_loader = (req, res, next) => {
-  const obj = {};
-  for (const [tableName, fields] of getAllSchemas) {
-    for (const { ref, field } of fields) {
-      const loaderName = ref + `_` + field + `_Loader`;
-      if (field && !obj[loaderName]) {
-        const batch = async (idsAndSelections) =>
-          batchIdsAndSelections(idsAndSelections, ref);
-        obj[loaderName] = new DataLoader(batch);
-      }
-    }
-  }
-  req.dataloader = obj;
-  next();
-};
-
-module.exports = { obj_loader };
+module.exports = { batchIds };

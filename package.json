@@ -1,6 +1,6 @@
 {
   "name": "backend-server",
-  "version": "0.0.2",
+  "version": "0.0.5",
   "description": "M&M Backend Server",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,8 @@
     "graphql-depth-limit": "^1.1.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.6.5",
-    "mysql2": "^2.3.3"
+    "sequelize": "^6.25.8",
+    "sqlite3": "^5.1.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"

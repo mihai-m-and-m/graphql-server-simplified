@@ -1,26 +1,30 @@
-/******** Create GraphQL Types and Nested Fields *******/
-
+/********************************************
+ ** Create GraphQL Types and Nested Fields **
+ ********************************************/
 const { GraphQLObjectType, GraphQLList, GraphQLNonNull } = require("graphql");
 const { getAllSchemas } = require("../../data");
 const { settings } = require("../../settings");
 const { nestedQueryResolvers } = require("../resolvers/resolversQueries");
 const { error_set, errors_logs } = require("../../errors/error_logs");
+const { resolverDateFormat } = require("../resolvers/resolversDate");
+const { dateFormatEnum } = require("../types/enumTypes");
 const {
   setTypes,
   setTimeStamp,
   setPaginationFields,
 } = require("../types/fieldsTypes");
-const { resolverDateFormat } = require("../resolvers/resolversDate");
-const { dateFormatEnum } = require("../types/enumTypes");
 
-/*********************************************************************
- Assign each schema field "types" and "resolver" for "nested fields"
-*********************************************************************/
+/***********************************************************************
+ ** Assign each schema field "types" and "resolver" for "nested fields"
+ * @param {*} Schema
+ * @returns
+ */
 const schemafieldsTypes = ([schemaName, fields]) => {
   const fieldsTypes = fields.map((field) => {
     const { name, types, args, ref, description, required, select } = field;
     const fieldType = getAllTypes[`${ref}Type`];
     let result = {};
+
     if (select) return;
     if (args) result.args = args;
     if (!ref) result.type = setTypes(types);
@@ -39,8 +43,9 @@ const schemafieldsTypes = ([schemaName, fields]) => {
     }
 
     if (ref)
-      result.resolve = (parent, args, context, info) =>
-        nestedQueryResolvers(parent, args, context, info, field);
+      result.resolve = (parent, args, context, info) => {
+        return nestedQueryResolvers(parent, args, context, info, field);
+      };
 
     return { [name]: result };
   });
@@ -52,9 +57,9 @@ const schemafieldsTypes = ([schemaName, fields]) => {
   return schemaFields;
 };
 
-/**********************************
- Create GraphQL Types from Schemas
-***********************************/
+/***************************************
+ ** Create GraphQL Types from Schemas
+ */
 let getAllTypes = new Map();
 const createType = (schema) => {
   let schemaName = schema[0];
@@ -73,6 +78,6 @@ for (let i = 0; i < getAllSchemas.length; i++) {
     error_set("createType", err.message);
   }
 }
-getAllTypes = Object.fromEntries(getAllTypes);
 
+getAllTypes = Object.fromEntries(getAllTypes);
 module.exports = { getAllTypes };

@@ -1,5 +1,9 @@
-/******** Define the resolver for "Date" type Fields ********/
-
+/************************************************
+ ** Define the resolver for "Date" type Fields **
+ * @param {Int} value Date value from database
+ * @param {Int} dateFormat Database table name
+ * @returns Array of "setFields", Map of "setRelations"
+ */
 const resolverDateFormat = (value, dateFormat = 4) => {
   if (!value) return;
   if (dateFormat === 0) return value.toLocaleDateString();

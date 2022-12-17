@@ -1,6 +1,7 @@
-/******** Generate Query based on provided Queries object ********/
-
-const { GraphQLList, GraphQLNonNull } = require("graphql");
+/*****************************************************
+ ** Generate Query based on provided Queries object **
+ *****************************************************/
+const { GraphQLList, GraphQLNonNull, GraphQLInt } = require("graphql");
 const { getAllQueries } = require("../../data");
 const { getAllTypes } = require("./functionTypes");
 const { filters } = require("../types/filtersTypes");
@@ -13,9 +14,12 @@ const {
   protectQueryAndMutationsFields,
 } = require("../../middleware/authMiddleware");
 
-/*****************************************************************
- Assign each field values and resolver for each key inside Query
-*****************************************************************/
+/*******************************************************************
+ ** Assign each field values and resolver for each key inside Query
+ * @param {OBJECT} fieldName
+ * @param {Array} protect
+ * @returns Field Object with properties
+ */
 const setQueriesFields = (fieldName, protect) => {
   let { types, arguments, target } = fieldName;
   [target, nullTarget] = target.split("!");
@@ -40,16 +44,17 @@ const setQueriesFields = (fieldName, protect) => {
   arguments.sortBy && (fieldName.args.sortBy.type = enumTypes.sort);
 
   fieldName.resolve = async (parent, args, context, info) => {
-    protectQueryAndMutations(protect, context);
-    return queriesResolvers(parent, args, context, info, fieldName);
+    protect && protectQueryAndMutations(protect, context);
+    let result = queriesResolvers(parent, args, context, info, fieldName);
+    return result;
   };
 
   return fieldName;
 };
 
-/*****************************************************************
- Generate all the Query's based on provided Queries object
-*****************************************************************/
+/*************************************************************
+ ** Generate all the Query's based on provided Queries object
+ */
 let Query = new Map();
 for (let i = 0; i < getAllQueries.length; i++) {
   let [queryName, fieldName] = getAllQueries[i];

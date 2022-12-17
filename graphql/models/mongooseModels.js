@@ -1,13 +1,16 @@
-/******** Create the Models using mongoose and assign "type" and options for each field ********/
-
+/***********************************************************************************
+ ** Create the Models using mongoose and assign "type" and options for each field **
+ ***********************************************************************************/
 const mongoose = require("mongoose");
 const { error_set, errors_logs } = require("../../errors/error_logs");
 const { getAllSchemas } = require("../../data");
 const { settings } = require("../../settings");
 
-/******************************************************************************
- Assign "type" and options for each field from each key inside "Schema" object
-******************************************************************************/
+/*********************************************************************************
+ ** Assign "type" and options for each field from each key inside "Schema" object
+ * @param {Array} fieldName
+ * @returns
+ */
 const schemaFields = (fieldName) => {
   let obj = {};
   fieldName.map((field) => {
@@ -31,9 +34,12 @@ const schemaFields = (fieldName) => {
   return obj;
 };
 
-/************************************************************
- Create the Models using mongoose and save it in a new object
-************************************************************/
+/****************************************************************
+ ** Create the Models using mongoose and save it in a new object
+ * @param {String} modelName
+ * @param {Array} fields
+ * @returns
+ */
 const createModel = (modelName, fields) => {
   let schemaName = `${modelName}Schema`;
   try {
@@ -51,8 +57,9 @@ let models = {};
 for (let i = 0; i < getAllSchemas.length; i++) {
   const modelName = getAllSchemas[i][0];
   const schemaFields = getAllSchemas[i][1];
-  if (!modelName.includes("__noDB"))
+  if (!modelName.includes("__noDB")) {
     models[modelName] = createModel(modelName, schemaFields);
+  }
 }
 
 module.exports = { models };

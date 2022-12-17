@@ -1,6 +1,6 @@
-/******** FILE FORMAT 
-1. TODO
-********/
+/**********************
+ * TODO: NOT YET DONE *
+ **********************/
 
 const notFound = (req, res, next) => {
   const error = new Error(`Not found - ${req.originalUrl}`);
