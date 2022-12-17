@@ -11,14 +11,14 @@ const settings = {
   /**
    ** File location to define all Schema/Query/Mutation
    */
-  data: "./data_mysql.json",
+  data: "./data.json",
 
   /**
    ** Database type
    * @param mongodb
    * @param mysql
    */
-  database: "mysql",
+  database: "mongodb",
 
   /**
    ** Backend server type

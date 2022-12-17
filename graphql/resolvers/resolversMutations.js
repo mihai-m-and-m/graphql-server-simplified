@@ -20,8 +20,7 @@ const db_type = settings.database;
  ** Check every argument from mutation and assign to new object "argsObj"
  * @param {OBJECT} arguments Object with arguments
  * @param {OBJECT} args Object with arguments from Mutation
- * @param {*} req
- * @param {*} argsObj
+ * @param {*} req Request
  * @returns
  */
 const argumentsFunction = async (arguments, args, req) => {

@@ -59,7 +59,7 @@ const filterFields = (fieldName) => {
 
 /****************************************************************
  ** Create Filter Input Object Type and save into "filters" obj
- * @param {Schema} schema
+ * @param {String} schema Schema name
  * @returns
  */
 const createFilterInput = (schema) => {

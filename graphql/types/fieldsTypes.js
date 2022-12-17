@@ -18,7 +18,7 @@ const { dateFormatEnum } = require("./enumTypes");
 /**********************************************************************************************
  ** Configure types for fields inside filters (searchBy, sortBy)
  ** Configure types for arguments of mutations fields used by below "setArgsTypes" function
- * @param {Field} fieldType
+ * @param {String} fieldType
  * @param {*} type
  * @returns
  */
