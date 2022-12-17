@@ -9,13 +9,15 @@ const { error_set, errors_logs } = require("../../errors/error_logs");
 
 /*********************************************************************************
  ** Assign "type" and options for each field from each key inside "Schema" object
- * @param {FieldName} fieldName
+ * @param {Array} fieldName Column name
  * @param {*} obj
  * @returns Object for each field with specific options
+ * TODO: "select" option for each field
+ * TODO: new settings to choose between INTEGER ID, UUID and UUIDv4
  */
 const setSchemaFields = (fieldName, obj = {}) => {
   fieldName.map((getField) => {
-    const { name, types, select, required, unique, ref, field } = getField;
+    const { name, types, select, required, unique } = getField;
     let type;
 
     if (types.includes("list") || types.includes("single")) return;
@@ -46,8 +48,8 @@ const setSchemaFields = (fieldName, obj = {}) => {
 
 /*****************************************************************
  ** Create the Models using sequelize and save it in a new object
- * @param {TableName} modelName
- * @param {ColumnName} fields
+ * @param {String} modelName Table name
+ * @param {Array} fields Column name
  * @returns Models for sequalize to use communicating with database
  */
 const createModel = (modelName, fields) => {
@@ -66,8 +68,9 @@ const createModel = (modelName, fields) => {
 
 /**********************************
  ** Create the Models Associations
- * @param {TableName} modelName
- * @param {ColumnName} fields
+ * @param {String} modelName Table name
+ * @param {Array} fields Column name
+ * TODO: choose diferent type of relations for "onDelete"
  */
 const createRelations = (modelName, fields) => {
   const allSchema = Object.fromEntries(getAllSchemas);
@@ -173,7 +176,7 @@ for (let i = 0; i < getAllSchemas.length; i++) {
 }
 
 /***************************************************
- ** Create the Models Associations for each column
+ ** Create the Associations for each Model
  */
 const queryRelation = new Map();
 for (let i = 0; i < getAllSchemas.length; i++) {

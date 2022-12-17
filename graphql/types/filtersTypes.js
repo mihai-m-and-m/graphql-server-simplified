@@ -36,7 +36,7 @@ const PaginationType = new GraphQLInputObjectType({
 
 /**************************************************************
  ** Filter Query result based on provided filters in arguments
- * @param {Field} fieldName
+ * @param {String} fieldName
  * @returns Object with property fields
  */
 const filterFields = (fieldName) => {

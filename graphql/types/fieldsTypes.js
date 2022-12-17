@@ -60,13 +60,30 @@ const setTimeStamp = () => {
   };
 };
 
+/******************************************************
+ ** Configure count for each Schema
+ */
+const setCountOfResult = () => {
+  return {
+    count: {
+      type: GraphQLInt,
+      // resolve(parent, args) {
+      //   return resolverDateFormat(parent.createdAt, args.date);
+      // },
+    },
+  };
+};
 /******************************************************************
  ** Configure nested query fields for pagination only for "list" type
  *? page: number of page
  *? perPage: number of items per page (Default 25)
  *******************************************************************/
 const setPaginationFields = () => {
-  return { page: { type: GraphQLInt }, perPage: { type: GraphQLInt } };
+  return {
+    page: { type: GraphQLInt },
+    perPage: { type: GraphQLInt },
+    count: { type: GraphQLBoolean },
+  };
 };
 
 /********************************************************
@@ -92,4 +109,10 @@ const setArgsTypes = (object) => {
   }
 };
 
-module.exports = { setTypes, setArgsTypes, setTimeStamp, setPaginationFields };
+module.exports = {
+  setTypes,
+  setArgsTypes,
+  setTimeStamp,
+  setCountOfResult,
+  setPaginationFields,
+};

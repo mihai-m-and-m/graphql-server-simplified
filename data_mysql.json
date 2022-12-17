@@ -111,7 +111,7 @@
     },
     "login": {
       "target": "auth__noDB",
-      "arguments": { "email": "Str!", "password": "Str!" },
+      "arguments": { "email": "email!", "password": "Str!" },
       "checksT": [ { "users": ["email", "password__decrypt", "adminlevel__select__jwt"] } ],
       "returns": { "userID": "users___id", "token": "users___id__token", "tokenExp": "tokenExp" }
     },
@@ -132,7 +132,7 @@
       "target": "products",
       "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
       "checksT": [ { "category": ["categoryIDs"] } ],
-      "savings": [ { "products": ["save"] }, { "products_category": [ "productsIDs", "categoryIDs"] } ]
+      "savings": [ { "products": ["save"] }, { "products_category": [ "categoryIDs", "productsIDs"] } ]
     }
   }
 }

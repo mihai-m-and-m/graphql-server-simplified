@@ -4,7 +4,7 @@
 
 /******************
  ** Logging errors
- * @param {ERROR} err
+ * @param {error} err
  * TODO: store errors into .txt file
  */
 const errors_logs = (err) => {
@@ -13,8 +13,8 @@ const errors_logs = (err) => {
 
 /******************
  ** Throw Errors
- * @param {STRING} text
- * @param {ERROR} args
+ * @param {String} text
+ * @param {error} args
  * TODO: IMPROVE ERROR HANDLING
  */
 const error_set = (text, args) => {
@@ -50,16 +50,29 @@ const error_set = (text, args) => {
     case "createFilterInput":
       text = "Error creating Filter Input in 'filtersTypes' file ";
       break;
+    case "notFoundInDB":
+      text = "Sorry, not found. Please try again!";
+      break;
+    case "notSavedInDB":
+      text = "Not saved in Database";
+      break;
+    case "noDatainDB":
+      text = "Sorry, no information to display";
+      break;
+    case "checkValidID":
+      text = "Invalid ID format";
+      break;
 
     case "checkExisting_false":
       text = "Exists already - " + args;
       break;
     case "checkExisting_true":
-      text = "Invalid details - " + args;
+      text = "Invalid details: " + args;
       break;
     case "checkValidEmail":
-      text = "Invalid Email format: " + args;
+      text = "Invalid email format: " + args;
       break;
+
     case "checkisAuth":
       text = "Authenticated: " + args;
       break;

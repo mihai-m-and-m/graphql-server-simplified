@@ -47,7 +47,7 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
   const { name, types, ref, field } = item;
   const loaderName = `${ref}_${field}_Loader`;
   const selection = getQuerySelections(info);
-  const { page, perPage = 25 } = args;
+  const { page, perPage = 25, count = false } = args;
   let ids = [];
   let result;
 
@@ -58,21 +58,28 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
 
   try {
     result = await context.dataloader[loaderName].loadMany(ids);
-    /**
-     * ! ONLY FOR MySQL
-     * ? "selections" will work if "sqlOptimize" is set to "selections" because of DataLoader caching, second query of already used model
-     * ? with same "id's" will return "null" for the new nested selections fields if wasn't selected in first selection
-     * ! choose between ".clearAll()" from below or "setFields = { exclude: [""] }" in "getFunctionFromDatabase" function from "db/dbQuery/mysql" file
-     */
-    if (settings.database === "mysql" && settings.sqlOptimize === "selections")
-      await context.dataloader[loaderName].clearAll();
   } catch (err) {
     errors_logs(err);
     error_set("nestedQueryResolvers", name + err.message);
   }
 
+  /*************** ONLY FOR MySQL
+   * ? "selections" will work if "sqlOptimize" is set to "selections" because of DataLoader caching, second query of already used model
+   * ? with same "id's" will return "null" for the new nested selections fields if wasn't selected in first selection
+   * ! choose between ".clearAll()" from below or "setFields = { exclude: [""] }" in "getFunctionFromDatabase" function from "db/dbQuery/mysql" file
+   */
+  if (settings.database === "mysql" && settings.sqlOptimize === "selections")
+    await context.dataloader[loaderName].clearAll();
+
   result.shift();
   result = result[0];
+
+  let co;
+  if (count) {
+    co = { count: result.length };
+  }
+  // console.log(co);
+  // console.log(result);
 
   if (page !== undefined && perPage) {
     const start = (page - 1) * perPage;

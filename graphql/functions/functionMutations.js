@@ -23,8 +23,8 @@ const {
  ** Checks True - continue if exists in DB
  ** Checks False - continue if not in DB
  ** Savings, Returns, etc...
- * @param {STRING} mutation
- * @param {*} parent
+ * @param {OBJECT} mutation
+ * @param {OBJECT} parent
  * @param {ARGUMENTS} args
  * @param {*} req
  * @returns Promise with requested object from database

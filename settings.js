@@ -11,14 +11,14 @@ const settings = {
   /**
    ** File location to define all Schema/Query/Mutation
    */
-  data: "./data.json",
+  data: "./data_mysql.json",
 
   /**
    ** Database type
    * @param mongodb
    * @param mysql
    */
-  database: "mongodb",
+  database: "mysql",
 
   /**
    ** Backend server type
@@ -69,7 +69,7 @@ const settings = {
   /**
    ** SQL optimize
    * @param selections - get selected fields from database
-   * @param caching - cache data from the same request
+   * @param caching - cache data in the same request
    */
   sqlOptimize: "caching",
 

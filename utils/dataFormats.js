@@ -1,12 +1,28 @@
-/******************************************
- ** Validate Email address for resolvers **
- ** Convert date format                  **
- ******************************************/
+/********************************************************************
+ ** Validate Email address for resolvers                           **
+ ** Validate ID format for MongoDB and UUIDv4 for Sequalize        **
+ ** Convert date format                                            **
+ ********************************************************************/
 const { GraphQLScalarType } = require("graphql");
+const { error_set } = require("../errors/error_logs");
 
-const validEmail = () => {
+const validEmail = (email) => {
   const validEmail = /^\w+([\.-] ?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  return validEmail;
+  if (email.match(validEmail)) return email;
+  else return error_set("checkValidEmail", email);
+};
+
+const validMongoID = (id) => {
+  const mongodbID = /^[0-9a-fA-F]{24}$/;
+  if (id.toString().match(mongodbID)) return id;
+  else return error_set("checkValidID", id);
+};
+
+const validUUIDv4 = (id) => {
+  const UUIDv4 =
+    /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+  if (id.toString().match(UUIDv4)) return id;
+  else return error_set("checkValidID", id);
 };
 
 function capitalizeFirstLetter(string) {
@@ -28,4 +44,4 @@ const dateScalar = new GraphQLScalarType({
   },
 });
 
-module.exports = { validEmail, dateScalar };
+module.exports = { validEmail, validMongoID, validUUIDv4, dateScalar };

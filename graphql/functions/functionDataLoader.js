@@ -7,13 +7,12 @@ const { groupSQLList } = require("../../utils/groupResult");
 
 /**************************************************************************************
  ** Batch all IDs and selected fields from Query and sort them after database response
- * @param {STRING} getIds
- * @param {DatabaseTable} ref
- * @param {DatabaseRelation} dbRelation
+ * @param {String} getIds
+ * @param {String} ref Database table name
  * @returns Promise with all data retrived from database
  * TODO: getDB result it's ok but "sort" and "groupSQLList" shuffle the result ordering by "getIds"
  */
-const batchIds = async (getIds, ref, selection, dbRelation) => {
+const batchIds = async (getIds, ref, selection) => {
   const getAllIds = [];
   const sort = {};
 
@@ -29,7 +28,7 @@ const batchIds = async (getIds, ref, selection, dbRelation) => {
   const ids = getAllIds.filter((i) => i);
 
   try {
-    const getDB = await findInDB(ref, ids, selection, dbRelation);
+    const getDB = await findInDB(ref, ids, selection);
     const groupedDB = groupSQLList(getDB);
     groupedDB.forEach((element) => (sort[element._id] = element));
 

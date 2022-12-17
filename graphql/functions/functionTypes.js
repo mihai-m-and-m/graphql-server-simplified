@@ -24,6 +24,7 @@ const schemafieldsTypes = ([schemaName, fields]) => {
     const { name, types, args, ref, description, required, select } = field;
     const fieldType = getAllTypes[`${ref}Type`];
     let result = {};
+
     if (select) return;
     if (args) result.args = args;
     if (!ref) result.type = setTypes(types);

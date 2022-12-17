@@ -18,7 +18,7 @@ const loaderMiddleware = (req, res, next) => {
       const loaderName = `${ref}_${field}_Loader`;
       if (field && !obj[loaderName]) {
         const batch = async ([selection, ...ids]) => {
-          const result = await batchIds(ids, ref, selection, tableName);
+          const result = await batchIds(ids, ref, selection);
           result.unshift(selection);
           return result;
         };

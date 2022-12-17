@@ -1,7 +1,7 @@
 /*****************************************************
  ** Generate Query based on provided Queries object **
  *****************************************************/
-const { GraphQLList, GraphQLNonNull } = require("graphql");
+const { GraphQLList, GraphQLNonNull, GraphQLInt } = require("graphql");
 const { getAllQueries } = require("../../data");
 const { getAllTypes } = require("./functionTypes");
 const { filters } = require("../types/filtersTypes");
@@ -16,8 +16,8 @@ const {
 
 /*******************************************************************
  ** Assign each field values and resolver for each key inside Query
- * @param {FieldName} fieldName
- * @param {ProtectedField} protect
+ * @param {OBJECT} fieldName
+ * @param {Array} protect
  * @returns Field Object with properties
  */
 const setQueriesFields = (fieldName, protect) => {
@@ -45,7 +45,8 @@ const setQueriesFields = (fieldName, protect) => {
 
   fieldName.resolve = async (parent, args, context, info) => {
     protect && protectQueryAndMutations(protect, context);
-    return queriesResolvers(parent, args, context, info, fieldName);
+    let result = queriesResolvers(parent, args, context, info, fieldName);
+    return result;
   };
 
   return fieldName;

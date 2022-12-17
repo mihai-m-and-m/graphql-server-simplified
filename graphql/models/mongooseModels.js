@@ -8,7 +8,7 @@ const { settings } = require("../../settings");
 
 /*********************************************************************************
  ** Assign "type" and options for each field from each key inside "Schema" object
- * @param {FieldName} fieldName
+ * @param {Array} fieldName
  * @returns
  */
 const schemaFields = (fieldName) => {
@@ -36,8 +36,8 @@ const schemaFields = (fieldName) => {
 
 /****************************************************************
  ** Create the Models using mongoose and save it in a new object
- * @param {ModelName} modelName
- * @param {Fields} fields
+ * @param {String} modelName
+ * @param {Array} fields
  * @returns
  */
 const createModel = (modelName, fields) => {
