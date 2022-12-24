@@ -11,14 +11,14 @@ const settings = {
   /**
    ** File location to define all Schema/Query/Mutation
    */
-  data: "./data.json",
+  data: "./data_mysql.json",
 
   /**
    ** Database type
    * @param mongodb
    * @param mysql
    */
-  database: "mongodb",
+  database: "mysql",
 
   /**
    ** Backend server type
@@ -33,6 +33,13 @@ const settings = {
    * ? true/false
    */
   timeStamp: true,
+
+  /**
+   ** Default Database query response order
+   * @param updatedAt - First element is the field/column name (Default: "updatedAt" - only with timeStamp enabled)
+   * @param DESC Second element is the order type ASC/DESC (Default: "DESC")
+   */
+  defaultDBOrder: ["updatedAt", "DESC"],
 
   /*****************************
    *! GraphQL server settings !*
@@ -69,9 +76,9 @@ const settings = {
   /**
    ** SQL optimize
    * @param selections - get selected fields from database
-   * @param caching - cache data in the same request
+   * @param caching - get all fields from database but cache it only in the same request
    */
-  sqlOptimize: "caching",
+  sqlOptimize: "selections",
 
   /**
    ** SQL database logging

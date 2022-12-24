@@ -3,14 +3,16 @@
  **********************/
 const { GraphQLEnumType } = require("graphql");
 
-const sort = new GraphQLEnumType({
-  name: "Sort",
+const sortByEnum = new GraphQLEnumType({
+  name: "Order",
   values: {
     ASC: {
-      value: 0,
+      value: "ASC",
+      description: "Ascending order (numeric or string)",
     },
     DESC: {
-      value: 1,
+      value: "DESC",
+      description: "Descending order (numeric or string)",
     },
   },
 });
@@ -50,6 +52,4 @@ const dateFormatEnum = new GraphQLEnumType({
   },
 });
 
-const enumTypes = { sort };
-
-module.exports = { enumTypes, dateFormatEnum };
+module.exports = { sortByEnum, dateFormatEnum };

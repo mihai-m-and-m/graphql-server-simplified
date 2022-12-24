@@ -1,15 +1,11 @@
 /****************************
  ** MySQL Database queries **
  ****************************/
-const { Op } = require("sequelize");
 const { sequelize } = require("../mysql");
 const { settings } = require("../../settings");
-const { error_set } = require("../../errors/error_logs");
 const { queryRelation } = require("../../graphql/models/sequelizeModels");
-const { validUUIDv4 } = require("../../utils/dataFormats");
-
-let defaultOrder = [];
-settings.timeStamp && (defaultOrder = [["updatedAt", "DESC"]]);
+const { validDBID } = require("../../utils/dataFormats");
+const { error_set } = require("../../errors/error_logs");
 
 /************************************************************
  ** Check for Associations and remove fields from selections
@@ -20,7 +16,6 @@ settings.timeStamp && (defaultOrder = [["updatedAt", "DESC"]]);
 const selectedFieldsforSQL = (dbFields, dbTable) => {
   const setRelations = new Map();
   let setFields = dbFields.split(" ");
-
   queryRelation.forEach(({ ref, field }, { modelName, fieldName }) => {
     dbTable === modelName &&
       setFields.map((getField) => {
@@ -30,9 +25,7 @@ const selectedFieldsforSQL = (dbFields, dbTable) => {
         }
       });
   });
-
   if (!setFields.includes("_id")) setFields.push("_id");
-
   return { setFields, setRelations };
 };
 
@@ -40,11 +33,13 @@ const selectedFieldsforSQL = (dbFields, dbTable) => {
  ** Get data from database
  * @param {String} dbTable Database table name
  * @param {String} dbFields String with multiple fields separeted with space
- * @param {Array?} whereValues Array of multiple objects ex: [{_id: '1'}]
+ * @param {Array?} whereValues Array of multiple objects. Example: [{_id: '1'}, {name: 'test'}]
+ * @param {Array?} order Array of multiple order. Example: [["updatedAt", "DESC"], ["price", "ASC"]]
  * @returns Promise with all data retrived from database
  */
-const getFunctionFromDatabase = async (dbTable, dbFields, whereValues = {}) => {
+const getFunctionFromDatabase = async (dbTable, dbFields, whereValues = {}, order = []) => {
   let { setFields, setRelations } = selectedFieldsforSQL(dbFields, dbTable);
+  const defaultOrder = [settings.defaultDBOrder];
   let relations = [];
   let result;
 
@@ -60,7 +55,7 @@ const getFunctionFromDatabase = async (dbTable, dbFields, whereValues = {}) => {
       result = await sequelize.models[dbTable].findAll({
         where: whereValues,
         raw: true,
-        order: defaultOrder,
+        order: order.length > 0 ? order : defaultOrder,
         attributes: setFields,
       });
     } catch (err) {
@@ -71,11 +66,7 @@ const getFunctionFromDatabase = async (dbTable, dbFields, whereValues = {}) => {
   }
 
   setRelations.forEach(({ ref, field }, { modelName, fieldName }) => {
-    relations.push({
-      model: sequelize.models[ref],
-      as: fieldName,
-      attributes: ["_id"],
-    });
+    relations.push({ model: sequelize.models[ref], as: fieldName, attributes: ["_id"] });
   });
 
   try {
@@ -83,7 +74,7 @@ const getFunctionFromDatabase = async (dbTable, dbFields, whereValues = {}) => {
       where: whereValues,
       raw: true,
       include: relations,
-      order: defaultOrder,
+      order: order.length > 0 ? order : defaultOrder,
       attributes: setFields,
     });
   } catch (err) {
@@ -106,26 +97,13 @@ const findAllInDB = async (dbTable, dbFields) => {
 /*********************************************************************
  ** Function used for first query to get data with arguments provided
  * @param {String} dbTable Database table name
- * @param {Array} arguments Array of arguments
  * @param {String} dbFields String with multiple fields separeted with space
- * @param {*} subFields
+ * @param {Array} arguments Array of arguments
+ * @param {Array?} order Array of multiple order
  * @returns Promise with all data retrived from database
  */
-const findWithArgsInDB = async (dbTable, arguments, dbFields, subFields) => {
-  const values = arguments.map(([argName, argValue]) => {
-    if (argName === "createdAt" || argName === "updatedAt") {
-      !argValue.to && (argValue.to = Date.now());
-      argValue = { [Op.gte]: argValue.from, [Op.lte]: argValue.to };
-    }
-    if (typeof argValue === "string")
-      if (subFields[argName]?.type?.name !== "ID" && argName !== "_id") {
-        argValue = { [Op.regexp]: argValue };
-      } else validUUIDv4(argValue);
-
-    return { [argName]: argValue };
-  });
-
-  return await getFunctionFromDatabase(dbTable, dbFields, values);
+const findWithArgsInDB = async (dbTable, dbFields, arguments, order) => {
+  return await getFunctionFromDatabase(dbTable, dbFields, arguments, order);
 };
 
 /******************************************************************
@@ -137,7 +115,7 @@ const findWithArgsInDB = async (dbTable, arguments, dbFields, subFields) => {
  * TODO: check for valid UUIDV4 and support for extra fields from mutations (JWT fields)
  */
 const findInDB = async (dbTable, ids, dbFields) => {
-  // const values = { _id: ids.map((i) => validUUIDv4(i)).flat() };
+  // const values = { _id: ids.map((i) => validDBID(i)).flat() };
   const values = { _id: ids.map((i) => i).flat() };
   return await getFunctionFromDatabase(dbTable, dbFields, values);
 };
@@ -151,7 +129,7 @@ const findInDB = async (dbTable, ids, dbFields) => {
 const findIdInDB = async (dbTable, idValue) => {
   let result;
   if (!Array.isArray(idValue)) {
-    validUUIDv4(idValue);
+    validDBID(idValue);
     try {
       result = await sequelize.models[dbTable].findByPk(idValue, { raw: true });
     } catch (err) {
@@ -162,7 +140,7 @@ const findIdInDB = async (dbTable, idValue) => {
     result = [];
     for (const id of idValue) {
       let find;
-      validUUIDv4(id);
+      validDBID(id);
       try {
         find = await sequelize.models[dbTable].findByPk(id, { raw: true });
       } catch (err) {
@@ -185,17 +163,9 @@ const findIdInDB = async (dbTable, idValue) => {
 const findOneInDB = async (dbTable, dbField, argsValue, encryptedFields) => {
   let result;
   let find;
-  if (encryptedFields && !Array.isArray(encryptedFields))
-    encryptedFields = encryptedFields.split(" ");
-
-  if (argsValue !== undefined) find = { raw: true };
-  else
-    find = {
-      where: { [dbField]: argsValue },
-      raw: true,
-      attributes: encryptedFields, // selected fields
-    };
-
+  if (encryptedFields && !Array.isArray(encryptedFields)) encryptedFields = encryptedFields.split(" ");
+  if (argsValue === undefined) find = { raw: true };
+  else find = { where: { [dbField]: argsValue }, raw: true, attributes: encryptedFields };
   try {
     result = await sequelize.models[dbTable].findOne(find);
   } catch (err) {
@@ -213,9 +183,7 @@ const findOneInDB = async (dbTable, dbField, argsValue, encryptedFields) => {
 const saveInDB = async (dbTable, argsValues) => {
   let result;
   try {
-    result = await sequelize.models[dbTable]
-      .create(argsValues)
-      .then((response) => response.get({ plain: true }));
+    result = await sequelize.models[dbTable].create(argsValues).then((response) => response.get({ plain: true }));
   } catch (err) {
     error_set("Internal database error", err);
   }

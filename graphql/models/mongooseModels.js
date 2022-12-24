@@ -16,8 +16,7 @@ const schemaFields = (fieldName) => {
   fieldName.map((field) => {
     let name = mongoose.Schema.Types.ObjectId;
     if (field.types.includes("ID")) return;
-    if (field.types.includes("Int") || field.types.includes("Float"))
-      name = Number;
+    if (field.types.includes("Int") || field.types.includes("Float")) name = Number;
     field.types.includes("Str") && (name = String);
     field.types.includes("Boolean") && (name = Boolean);
     field.types.includes("Date") && (name = Date);
@@ -57,9 +56,7 @@ let models = {};
 for (let i = 0; i < getAllSchemas.length; i++) {
   const modelName = getAllSchemas[i][0];
   const schemaFields = getAllSchemas[i][1];
-  if (!modelName.includes("__noDB")) {
-    models[modelName] = createModel(modelName, schemaFields);
-  }
+  if (!modelName.includes("__noDB")) models[modelName] = createModel(modelName, schemaFields);
 }
 
 module.exports = { models };

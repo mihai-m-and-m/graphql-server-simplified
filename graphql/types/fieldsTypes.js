@@ -1,24 +1,16 @@
 /**********************************
  ** Define all the Types for API **
  **********************************/
-const {
-  GraphQLString,
-  GraphQLInt,
-  GraphQLID,
-  GraphQLFloat,
-  GraphQLBoolean,
-  GraphQLList,
-  GraphQLNonNull,
-} = require("graphql");
+const { GraphQLString, GraphQLInt, GraphQLID, GraphQLFloat, GraphQLBoolean, GraphQLList, GraphQLNonNull } = require("graphql");
 const { error_set, errors_logs } = require("../../errors/error_logs");
 const { resolverDateFormat } = require("../resolvers/resolversDate");
-const { dateScalar } = require("../../utils/dataFormats");
+const { dateScalar } = require("./scalarTypes");
 const { dateFormatEnum } = require("./enumTypes");
 
 /**********************************************************************************************
  ** Configure types for fields inside filters (searchBy, sortBy)
  ** Configure types for arguments of mutations fields used by below "setArgsTypes" function
- * @param {String} fieldType
+ * @param {string} fieldType
  * @param {*} type
  * @returns
  */
@@ -60,59 +52,17 @@ const setTimeStamp = () => {
   };
 };
 
-/******************************************************
- ** Configure count for each Schema
- */
-const setCountOfResult = () => {
-  return {
-    count: {
-      type: GraphQLInt,
-      // resolve(parent, args) {
-      //   return resolverDateFormat(parent.createdAt, args.date);
-      // },
-    },
-  };
-};
 /******************************************************************
  ** Configure nested query fields for pagination only for "list" type
  *? page: number of page
  *? perPage: number of items per page (Default 25)
  *******************************************************************/
 const setPaginationFields = () => {
-  return {
-    page: { type: GraphQLInt },
-    perPage: { type: GraphQLInt },
-    count: { type: GraphQLBoolean },
-  };
-};
-
-/********************************************************
- ** Configure types for arguments of mutations fields
- ** Configure types for arguments of query fields
- * @param {OBJECT} object
- * @returns
- */
-const setArgsTypes = (object) => {
-  const types = Object.entries(object);
-  let obj = {};
-
-  try {
-    for (const type of types) {
-      const [argName, argType] = type;
-      obj[argName] = (argName, { type: setTypes(argType) });
-    }
-    return obj;
-  } catch (err) {
-    errors_logs(err);
-    error_set("setFieldsTypes", object + err.message);
-    throw err;
-  }
+  return { page: { type: GraphQLInt }, perPage: { type: GraphQLInt } };
 };
 
 module.exports = {
   setTypes,
-  setArgsTypes,
   setTimeStamp,
-  setCountOfResult,
   setPaginationFields,
 };

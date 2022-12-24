@@ -10,15 +10,11 @@ const { error_set } = require("../errors/error_logs");
  * @param {*} param1
  * @returns
  */
-const protectQueryAndMutations = (
-  [queryName, method, level],
-  { isAuth, token }
-) => {
+const protectQueryAndMutations = ([queryName, method, level], { isAuth, token }) => {
   if (queryName && !isAuth) return error_set("checkisAuth", isAuth);
   const getLevel = token?.info?.adminlevel;
 
-  if (queryName && method !== "auth" && getLevel >= 0 && !(getLevel >= level))
-    return error_set("checkisAdmin", level);
+  if (queryName && method !== "auth" && getLevel >= 0 && !(getLevel >= level)) return error_set("checkisAdmin", level);
 };
 
 /******************************************************************************************
@@ -29,8 +25,7 @@ const protectQueryAndMutations = (
 const protectQueryAndMutationsFields = (field) => {
   if (field.includes("__")) {
     const [fieldName, method, level] = field.split("__");
-    if (method.includes("auth") || method.includes("adminlevel"))
-      return [fieldName, method, level];
+    if (method.includes("auth") || method.includes("adminlevel")) return [fieldName, method, level];
   }
 };
 
@@ -55,6 +50,7 @@ const authMiddleware = (req, res, next) => {
   }
   try {
     decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    // console.log(decodedToken);
   } catch (err) {
     req.isAuth = false;
     return next();

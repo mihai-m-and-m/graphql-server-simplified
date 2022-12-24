@@ -71,14 +71,13 @@ const createModel = (modelName, fields) => {
  * @param {String} modelName Table name
  * @param {Array} fields Column name
  * TODO: choose diferent type of relations for "onDelete"
+ * TODO: customize Table for Many-to-Many relations
  */
 const createRelations = (modelName, fields) => {
   const allSchema = Object.fromEntries(getAllSchemas);
-
   fields.map(({ name, types, ref, field }) => {
     if (types === "list") {
       queryRelation.set({ modelName, fieldName: name }, { ref, field });
-
       allSchema[ref].map((refModel) => {
         const { name: refName, types: refType, field: refField } = refModel;
         if (refName === field) {
@@ -88,9 +87,7 @@ const createRelations = (modelName, fields) => {
               as: refField,
               // onDelete: "CASCADE",
             });
-            sequelize.models[ref].belongsTo(sequelize.models[modelName], {
-              foreignKey: { name: field, allowNull: false },
-            });
+            sequelize.models[ref].belongsTo(sequelize.models[modelName], { foreignKey: { name: field, allowNull: false } });
           }
           if (refType === "list" && !sequelize.models[`${ref}_${modelName}`]) {
             let relationName = `${modelName}_${ref}`;
@@ -98,17 +95,9 @@ const createRelations = (modelName, fields) => {
             //* Define new Database Table for Many-to-Many relations
             sequelize.define(
               relationName,
-              {
-                _id: {
-                  type: DataTypes.INTEGER,
-                  primaryKey: true,
-                  autoIncrement: true,
-                  allowNull: false,
-                },
-              },
-              { freezeTableName: true, timestamps: false }
+              { _id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false } },
+              { freezeTableName: true, timestamps: settings.timeStamp }
             );
-
             sequelize.models[modelName].belongsToMany(sequelize.models[ref], {
               as: refField,
               through: relationName,
@@ -122,21 +111,10 @@ const createRelations = (modelName, fields) => {
               otherKey: refName,
             });
 
-            sequelize.models[modelName].hasMany(
-              sequelize.models[relationName],
-              { foreignKey: refName, as: refName }
-            );
-            sequelize.models[ref].hasMany(sequelize.models[relationName], {
-              foreignKey: refField,
-              as: refField,
-            });
-            sequelize.models[relationName].belongsTo(
-              sequelize.models[modelName],
-              { foreignKey: { name: refName } }
-            );
-            sequelize.models[relationName].belongsTo(sequelize.models[ref], {
-              foreignKey: { name: refField },
-            });
+            sequelize.models[modelName].hasMany(sequelize.models[relationName], { foreignKey: refName, as: refName });
+            sequelize.models[ref].hasMany(sequelize.models[relationName], { foreignKey: refField, as: refField });
+            sequelize.models[relationName].belongsTo(sequelize.models[modelName], { foreignKey: { name: refName } });
+            sequelize.models[relationName].belongsTo(sequelize.models[ref], { foreignKey: { name: refField } });
           }
         }
       });
@@ -144,19 +122,12 @@ const createRelations = (modelName, fields) => {
     if (types.includes("single")) {
       allSchema[ref].map((refModel) => {
         const { name: refName, types: refType, field: refField } = refModel;
-
         if (refName === field) {
           if (refType === "single") {
             queryRelation.forEach((value, key) => {
               if (key.modelName !== modelName && key.fieldName !== name) {
-                queryRelation.set(
-                  { modelName, fieldName: name },
-                  { ref, field }
-                );
-
-                sequelize.models[ref].hasOne(sequelize.models[modelName], {
-                  foreignKey: name,
-                });
+                queryRelation.set({ modelName, fieldName: name }, { ref, field });
+                sequelize.models[ref].hasOne(sequelize.models[modelName], { foreignKey: name });
                 sequelize.models[modelName].belongsTo(sequelize.models[ref]);
               }
             });

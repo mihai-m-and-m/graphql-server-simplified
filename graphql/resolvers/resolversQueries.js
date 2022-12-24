@@ -3,8 +3,24 @@
  ***********************/
 const { error_set, errors_logs } = require("../../errors/error_logs");
 const { groupSQLList } = require("../../utils/groupResult");
+const { validDBID } = require("../../utils/dataFormats");
 const { findAllInDB, findWithArgsInDB } = require("../../db/dbQuery");
 const { settings } = require("../../settings");
+const { Op } = require("sequelize");
+
+/***************************************************************
+ ** Operations in different Databases
+ * ["eq", "ne", "lt", "lte", "gt", "gte"];
+ */
+const operationsDB = (opName) => {
+  if (settings.database === "mysql") {
+    if (opName === "regex") return Op.regexp;
+    return Op[opName];
+  }
+  if (settings.database === "mongodb") {
+    return `$${opName}`;
+  }
+};
 
 /***************************************************************
  ** Select "fieldNodes" from query (selected fields to query DB)
@@ -36,7 +52,7 @@ const getQuerySubArguments = ({ fieldNodes }) => {
 
 /********************************************************************
  ** Query resolvers for nested fields with DataLoader for perfomarce
- * @param {OBJECT} parent
+ * @param {object} parent
  * @param {ARGUMENTS} args
  * @param {CONTEXT} context
  * @param {INFO} info
@@ -68,18 +84,10 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
    * ? with same "id's" will return "null" for the new nested selections fields if wasn't selected in first selection
    * ! choose between ".clearAll()" from below or "setFields = { exclude: [""] }" in "getFunctionFromDatabase" function from "db/dbQuery/mysql" file
    */
-  if (settings.database === "mysql" && settings.sqlOptimize === "selections")
-    await context.dataloader[loaderName].clearAll();
+  if (settings.database === "mysql" && settings.sqlOptimize === "selections") await context.dataloader[loaderName].clearAll();
 
   result.shift();
   result = result[0];
-
-  let co;
-  if (count) {
-    co = { count: result.length };
-  }
-  // console.log(co);
-  // console.log(result);
 
   if (page !== undefined && perPage) {
     const start = (page - 1) * perPage;
@@ -103,19 +111,67 @@ const nestedQueryResolvers = async (parent, args, context, info, item) => {
  * @returns Promise with all data retrived from database
  */
 const queriesResolvers = async (parent, args, context, info, fieldName) => {
-  let subfields = fieldName?.args;
-  const { target, types } = fieldName;
   const selection = getQuerySelections(info);
-  let arguments = Object.entries(args);
+  const { target, types } = fieldName;
+  let subfields = fieldName?.args;
+  let allArguments = [];
   let items = [];
+  let order = [];
 
-  if (args.searchBy) {
-    subfields = fieldName?.args?.searchBy?.type?._fields;
-    arguments = Object.entries(args.searchBy);
+  if (args) {
+    const opType = ["eq", "ne", "lt", "lte", "gt", "gte"];
+    const arguments = Object.entries(args);
+
+    arguments.map(([argName, argValue]) => {
+      const argsSort = Object.entries(argValue);
+      if (argName === "sortBy") {
+        for (let [name, value] of argsSort) {
+          const keys = Object.keys(value);
+          if (value.order) order.push([name, value.order]);
+          if (value === "ASC" || value === "DESC") order.push([name, value]);
+          opType.forEach((i) => keys.includes(i) && allArguments.push({ [name]: { [operationsDB(i)]: value[i] } }));
+        }
+      } else if (argName === "searchBy") {
+        subfields = fieldName?.args?.searchBy?.type?._fields;
+        for (let [name, value] of argsSort) {
+          const keys = Object.keys(value);
+
+          if (subfields[name]?.type?.ofType?.name === "ID" || subfields[name]?.type?.name === "ID" || name === "_id") {
+            if (!Array.isArray(value)) {
+              validDBID(value);
+              allArguments.push({ [name]: value });
+            } else
+              for (const id of value) {
+                validDBID(id);
+                allArguments.push({ [name]: id });
+              }
+          } else {
+            if (name === "createdAt" || name === "updatedAt") {
+              !value.to && (value.to = Date.now());
+              allArguments.push({ [name]: { [operationsDB("gte")]: value.from, [operationsDB("lte")]: value.to } });
+            } else if (typeof value === "string") allArguments.push({ [name]: { [operationsDB("regex")]: value } });
+            else allArguments.push({ [name]: value });
+          }
+        }
+      } else {
+        if (typeof argValue === "string") {
+          if (argName === "_id" || subfields[argName]?.type?.name === "ID") {
+            if (!Array.isArray(argValue)) {
+              validDBID(argValue);
+              allArguments.push({ [argName]: argValue });
+            } else
+              for (const id of argValue) {
+                validDBID(id);
+                allArguments.push({ [argName]: id });
+              }
+          } else argValue = { [operationsDB("regex")]: argValue };
+        } else allArguments.push({ [argName]: value });
+      }
+    });
   }
 
-  if (arguments.length === 0) items = await findAllInDB(target, selection);
-  else items = await findWithArgsInDB(target, arguments, selection, subfields);
+  if (allArguments.length === 0) items = await findAllInDB(target, selection);
+  else items = await findWithArgsInDB(target, selection, allArguments, order);
 
   const result = items.map((item) => item);
   if (types === "single") return result[0];
