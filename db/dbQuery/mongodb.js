@@ -43,7 +43,7 @@ const findAllInDB = async (dbTable, dbFields) => {
  */
 const findWithArgsInDB = async (dbTable, dbFields, arguments, order) => {
   let result;
-  const sort = order.length > 0 ? order : defaultOrder();
+  const sort = order?.length > 0 ? order : defaultOrder();
   try {
     result = await models[dbTable].find({ $and: arguments }).select(dbFields).sort(sort);
   } catch (err) {
