@@ -4,6 +4,15 @@ This is a work in progress any change at any time could be a braking change befo
 
 Get a full GraphQL API server with `MongoDB` database OR `MySQL` database (for now) from a simple json file.
 
+# Summary
+
+[1 - How to use the server](https://github.com/mihai-m-and-m/backend#how-to-use-the-server)
+[2 - Define Schema (model, table, types](https://github.com/mihai-m-and-m/backend#1st-step---define-schema-model-table-types-with-single-definition)
+[3 - Define Queries](https://github.com/mihai-m-and-m/backend#2nd-step---define-queries)
+[4 - Define Mutations](https://github.com/mihai-m-and-m/backend#3rd-step---define-mutations)
+[5 - Info](https://github.com/mihai-m-and-m/backend#info)
+[6 - Code examples](https://github.com/mihai-m-and-m/backend#examples)
+
 This server includes `express, express-graphql, graphql, mongoose, cors, dataloader, dotenv, graphql-depth-limit, sequelize, sqlite3` packages as default.
 
 Also using `bcryptjs` to encrypt special password field (or any other field if you wish) and `jsonwebtoken` to secure protect the server.
@@ -61,7 +70,9 @@ Every key will have a value of object made of required `target`, `types` and `ar
 
 `arguments` key will be an object with one or multiple valid fields/columns from `target` key which must be a valid schema name
 
-Also inside `arguments` adding `searchBy` as key and value will auto make a full "search type" including all fields from `target`
+Inside `arguments` adding `searchBy` as key and value will auto make a full "search input type" including all fields from `target`
+
+Also inside `arguments` adding `sortBy` as key and value will auto make a full "sort input type" including all fields from `target` with all types of sorting ASC(ascending) and DESC(descending) for Strings and for Int or Float `eq: "Equal to", ne: "Not equal to", lt: "Lower than", lte: "Lower or equal than", gt: "Greater than", gte: "Greater or equal than"`
 
 ### Supported Queries types
 
@@ -114,6 +125,7 @@ NOTE: Because of different structure of multiple Databases the values differ. Pl
 | `<field1>__<field2>` | update database fields for Many-to-Many relations |
 
 **INFO for MongoDB**
+
 We need to have one object for every diferent collection/field inserts
 For example to insert one product in `products` collection with a specific category that belongs to a different collection let's say `categories`. After the object "save" inside `products` we need another object with key `categories` (as the collection in database) and the coresponding field as an array.
 
@@ -133,6 +145,7 @@ For example to insert one product in `products` collection with a specific categ
 ```
 
 **If we want to insert into database a new product but with a specific category we need to make `saving` like this:**
+
 Observe the new object `{ "categories": ["productsIDs"] }` represent categories collection with productsIDs the field inside. But of course we need to add the "checksT" also to make sure we verify first the "id's" from arguments.
 
 ```json
@@ -145,6 +158,7 @@ Observe the new object `{ "categories": ["productsIDs"] }` represent categories 
 ```
 
 **INFO for MySQL**
+
 Because MySQL is a Relational Database with help of ForeignKey, the One-To-Many relation is already there. But for Many-To-Many relation we need a object with key as a name from the two tables united by `_` and as value an array with the two fields from each table. The order is not important because the server is checking for both ways. Following the above example we need to have this:
 
 ```json
@@ -175,6 +189,8 @@ Using `__adminlevel__1` at the end of Query/Mutation name will restrict the rout
 TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar type interval improving query filtering). Default return of TimeStamps will be in `ISO` if argument `date` is not provided.
 
 `TimeStamps` as well as `graphiql` interface will be `enabled` by default but you can opt out to disable them from `settings.js` file. Inside you have extra options like `graphalDepthLimit` GraphQL Depth Limit (how deep you are alowed to query), choose between multiple `backend` API's and different `database` types.
+
+# Examples
 
 #### Example of Schemas:
 
@@ -225,7 +241,8 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
       { "name": "token", "types": "Str", "required": "true" },
       { "name": "tokenExp", "types": "Str", "required": "true" }
     ]
-  },
+  }
+
 ```
 
 #### Example of Queries:
@@ -233,10 +250,10 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
 ```json
 
   "Queries": {
-    "getCategory": {
+    "getCategories": {
       "types": "list",
       "description": "Get categories of products",
-      "arguments": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "searchBy": "searchBy", "sortBy": "sortBy" },
       "target": "category"
     },
     "getUser__auth": {
@@ -248,7 +265,7 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
     "getUsers__auth": {
       "types": "list",
       "description": "Get all users if no argument or a list of users based on argument/s",
-      "arguments": { "username": "Str", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "username": "Str", "searchBy": "searchBy" },
       "target": "users"
     },
     "getProduct__auth": {
@@ -260,7 +277,7 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
     "getProducts": {
       "types": "list",
       "description": "Get all or a list of orders based on arguments",
-      "arguments": { "_id": "list", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy", "sortBy": "sortBy" },
       "target": "products"
     },
     "getOrder__auth": {
@@ -287,7 +304,8 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
       "arguments": { "_id": "list", "userID": "ID", "searchBy": "searchBy", "sortBy": "sortBy"  },
       "target": "reviews!"
     }
-  },
+  }
+
 ```
 
 #### Example of MongoDB Mutations:
@@ -327,6 +345,7 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
       "savings": [ { "products": ["save"] }, { "category": ["productsIDs"] } ]
     }
   }
+
 ```
 
 #### Example of MySQL Mutations (Only the difference):

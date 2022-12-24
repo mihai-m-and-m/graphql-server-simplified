@@ -1,9 +1,20 @@
 /******************************
  ** MongoDB Database queries **
  ******************************/
-const { error_set } = require("../../errors/error_logs");
+const { settings } = require("../../settings");
 const { models } = require("../../graphql/models/mongooseModels");
-const { validMongoID } = require("../../utils/dataFormats");
+const { validDBID } = require("../../utils/dataFormats");
+const { error_set } = require("../../errors/error_logs");
+
+/********************************************************************************
+ ** Transform Default Order from settings into proper object for mongoose sort
+ */
+const defaultOrder = () => {
+  const [fieldName, type] = settings.defaultDBOrder;
+  let orderType;
+  type === "ASC" ? (orderType = 1) : (orderType = -1);
+  return { [fieldName]: orderType };
+};
 
 /*************************************************************
  ** Function used for normal field (first query) to get data
@@ -25,28 +36,16 @@ const findAllInDB = async (dbTable, dbFields) => {
 /*********************************************************************
  ** Function used for first query to get data with arguments provided
  * @param {String} dbTable Database table name
- * @param {Array} arguments Array of arguments
  * @param {String} dbFields String with multiple fields separeted with space
- * @param {*} subFields
+ * @param {Array} arguments Array of arguments
+ * @param {Array?} order Array of multiple order
  * @returns Promise with all data retrived from database
  */
-const findWithArgsInDB = async (dbTable, arguments, dbFields, subFields) => {
+const findWithArgsInDB = async (dbTable, dbFields, arguments, order) => {
   let result;
-  const values = arguments.map(([argName, argValue]) => {
-    if (argName === "createdAt" || argName === "updatedAt") {
-      if (!argValue.to) argValue.to = Date.now();
-      argValue = { $gte: argValue.from, $lte: argValue.to };
-    }
-    if (typeof argValue === "string") {
-      if (subFields[argName].type.name !== "ID")
-        argValue = { $regex: argValue, $options: "i" };
-      else validMongoID(argValue);
-    }
-    return { [argName]: argValue };
-  });
-
+  const sort = order?.length > 0 ? order : defaultOrder();
   try {
-    result = await models[dbTable].find({ $and: values }).select(dbFields);
+    result = await models[dbTable].find({ $and: arguments }).select(dbFields).sort(sort);
   } catch (err) {
     error_set("Internal database error", err);
   }
@@ -60,13 +59,11 @@ const findWithArgsInDB = async (dbTable, arguments, dbFields, subFields) => {
  * @param {Array} ids Array of ID's
  * @param {String} dbFields String with multiple fields separeted with space
  * @returns Promise with all data retrived from database
- * TODO: test validMongoID and support for extra fields from mutations (JWT fields)
+ * TODO: test validDBID and support for extra fields from mutations (JWT fields)
  */
 const findInDB = async (dbTable, idValue, dbFields) => {
   try {
-    return await models[dbTable]
-      .find({ _id: { $in: idValue } })
-      .select(dbFields);
+    return await models[dbTable].find({ _id: { $in: idValue } }).select(dbFields);
   } catch (err) {
     error_set("Internal database error", idValue);
   }
@@ -81,7 +78,7 @@ const findInDB = async (dbTable, idValue, dbFields) => {
 const findIdInDB = async (dbTable, idValue) => {
   let result;
   if (!Array.isArray(idValue)) {
-    validMongoID(idValue);
+    validDBID(idValue);
     try {
       result = await models[dbTable].findById(idValue);
     } catch (err) {
@@ -92,7 +89,7 @@ const findIdInDB = async (dbTable, idValue) => {
     result = [];
     for (const id of idValue) {
       let find;
-      validMongoID(id);
+      validDBID(id);
       try {
         find = await models[dbTable].findById(id);
       } catch (err) {
@@ -148,10 +145,10 @@ const saveInDB = async (dbTable, argsValues) => {
  * @param {{}} savedObj Object already created/saved
  * @returns Promise with updated data from database
  * TODO: updates for specific fields and values
- * TODO: validMongoID not need yet because was already been checked inside resultObj
+ * TODO: validDBID not need yet because was already been checked inside resultObj
  */
 const updateInDB = async (dbTable, updateField, resultObj, savedObj) => {
-  // resultObj[dbTable].forEach((id) => validMongoID(id));
+  // resultObj[dbTable].forEach((id) => validDBID(id));
   const condition = { _id: { $in: resultObj[dbTable] } };
   const update = { $push: { [updateField]: savedObj._id } };
   try {

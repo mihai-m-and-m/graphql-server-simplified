@@ -3,12 +3,9 @@
  ****************************/
 const { getAllTypes } = require("./functionTypes");
 const { getAllMutations } = require("../../data");
-const { setArgsTypes } = require("../types/fieldsTypes");
+const { setArgsTypes } = require("../types/inputTypes");
 const { errors_logs, error_set } = require("../../errors/error_logs");
-const {
-  protectQueryAndMutations,
-  protectQueryAndMutationsFields,
-} = require("../../middleware/authMiddleware");
+const { protectQueryAndMutations, protectQueryAndMutationsFields } = require("../../middleware/authMiddleware");
 const {
   argumentsFunction,
   checkFalseFunction,
@@ -54,7 +51,7 @@ for (const mutation of getAllMutations) {
   try {
     setAllMutations.set(mutationName, {
       type: getAllTypes[`${mutationFields.target}Type`],
-      args: setArgsTypes(mutationFields.arguments),
+      args: setArgsTypes(mutationFields.arguments, mutationFields.target),
       async resolve(parent, args, req) {
         protect && protectQueryAndMutations(protect, req);
         return mutationResolver(mutationFields, parent, args, req);

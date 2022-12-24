@@ -47,10 +47,10 @@
   },
 
   "Queries": {
-    "getCategory": {
+    "getCategories": {
       "types": "list",
       "description": "Get categories of products",
-      "arguments": { "_id": "ID", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy", "sortBy": "sortBy" },
       "target": "category"
     },
     "getUser__auth": {
@@ -74,7 +74,7 @@
     "getProducts": {
       "types": "list",
       "description": "Get all or a list of orders based on arguments",
-      "arguments": { "_id": "list", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy", "sortBy": "sortBy" },
       "target": "products"
     },
     "getOrder__auth": {
@@ -105,7 +105,7 @@
   "Mutations": {
     "register": {
       "target": "users",
-      "arguments": { "username": "Str!", "email": "email!", "password": "encrypt!" },
+      "arguments": { "email": "email!", "password": "encrypt!" },
       "checksF": [ { "users": ["email__select"] } ],
       "savings": [ { "users": ["save"] } ]
     },
@@ -132,7 +132,7 @@
       "target": "products",
       "arguments": { "name": "Str!", "categoryIDs": "list", "image": "Str", "price": "Float!", "description": "Str!", "countInStock": "Int" },
       "checksT": [ { "category": ["categoryIDs"] } ],
-      "savings": [ { "products": ["save"] }, { "products_category": [ "productsIDs", "categoryIDs"] } ]
+      "savings": [ { "products": ["save"] }, { "products_category": [ "categoryIDs", "productsIDs"] } ]
     }
   }
 }
