@@ -7,10 +7,15 @@ Get a full GraphQL API server with `MongoDB` database OR `MySQL` database (for n
 # Summary
 
 [1 - How to use the server](https://github.com/mihai-m-and-m/backend#how-to-use-the-server)
+
 [2 - Define Schema (model, table, types](https://github.com/mihai-m-and-m/backend#1st-step---define-schema-model-table-types-with-single-definition)
+
 [3 - Define Queries](https://github.com/mihai-m-and-m/backend#2nd-step---define-queries)
+
 [4 - Define Mutations](https://github.com/mihai-m-and-m/backend#3rd-step---define-mutations)
+
 [5 - Info](https://github.com/mihai-m-and-m/backend#info)
+
 [6 - Code examples](https://github.com/mihai-m-and-m/backend#examples)
 
 This server includes `express, express-graphql, graphql, mongoose, cors, dataloader, dotenv, graphql-depth-limit, sequelize, sqlite3` packages as default.
