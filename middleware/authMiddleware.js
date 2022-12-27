@@ -52,8 +52,11 @@ const authMiddleware = async (req, res, next) => {
   try {
     decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     validDBID(decodedToken.id);
-    const find = await findWithArgsInDB("users", ["_id", "adminlevel"], [{ _id: decodedToken.id }]);
-    if (!find) return error_set("checkisAuth", isAuth);
+    const find = await findWithArgsInDB("users", "_id adminlevel", [
+      { _id: decodedToken.id },
+      { adminlevel: decodedToken.info.adminlevel },
+    ]);
+    if (!find) req.isAuth = false;
   } catch (err) {
     req.isAuth = false;
     return next();
