@@ -1,9 +1,8 @@
 /****************************
  ** MySQL Database queries **
  ****************************/
-const { sequelize } = require("../mysql");
+const { sequelize, queryRelation } = require("../../models/sequelizeModels");
 const { settings } = require("../../settings");
-const { queryRelation } = require("../../graphql/models/sequelizeModels");
 const { validDBID } = require("../../utils/dataFormats");
 const { error_set } = require("../../errors/error_logs");
 

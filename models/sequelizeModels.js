@@ -1,11 +1,20 @@
 /************************************************************************************
  ** Create the Models using sequalize and assign "type" and options for each field **
  ************************************************************************************/
-const { DataTypes } = require("sequelize");
-const { getAllSchemas } = require("../../data");
-const { settings } = require("../../settings");
-const { sequelize } = require("../../db/mysql");
-const { error_set, errors_logs } = require("../../errors/error_logs");
+const { Sequelize, DataTypes } = require("sequelize");
+const { getAllSchemas } = require("../data");
+const { settings } = require("../settings");
+const { database, sqlLogging } = settings;
+const { error_set, errors_logs } = require("../errors/error_logs");
+
+/*****************************
+ ** Set Sequelize connection
+ */
+const sequelize = new Sequelize(process.env.DB_NAME || "database", process.env.DB_USER || "root", process.env.DB_PASS || "root", {
+  host: process.env.DB_HOST || "localhost",
+  dialect: database,
+  logging: sqlLogging,
+});
 
 /*********************************************************************************
  ** Assign "type" and options for each field from each key inside "Schema" object
@@ -155,4 +164,4 @@ for (let i = 0; i < getAllSchemas.length; i++) {
   if (!modelName.includes("__noDB")) createRelations(modelName, schemaFields);
 }
 
-module.exports = { queryRelation };
+module.exports = { queryRelation, sequelize };

@@ -1,20 +1,9 @@
 /*******************************
  ** MYSQL DATABASE CONNECTION **
  *******************************/
-const { Sequelize } = require("sequelize");
 const { settings } = require("../settings");
-const { database, sqlLogging, databaseSync } = settings;
-
-const sequelize = new Sequelize(
-  process.env.DB_NAME || "database",
-  process.env.DB_USER || "root",
-  process.env.DB_PASS || "root",
-  {
-    host: process.env.DB_HOST || "localhost",
-    dialect: database,
-    logging: sqlLogging,
-  }
-);
+const { databaseSync } = settings;
+const { sequelize } = require("../models/sequelizeModels");
 
 /***************************
  * Database synchronization
