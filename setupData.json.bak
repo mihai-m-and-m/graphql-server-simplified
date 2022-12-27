@@ -1,0 +1,80 @@
+{
+  "Schemas": {
+	"users": [
+      { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+      { "name": "username", "types": "Str", "required": "true" },
+      { "name": "email", "types": "Str", "required": "true", "unique": "true", "select": "false" },
+      { "name": "password", "types": "Str", "required": "true", "select": "false" },
+      { "name": "adminlevel", "types": "Int", "required": "true", "default": "0", "select": "false" }
+    ],
+    "Schemas": [
+      { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+      { "name": "schemaName", "types": "Str", "required": "true" },
+      { "name": "schemaField", "types": "Str", "required": "true" },
+      { "name": "types", "types": "Str", "required": "true" },
+      { "name": "required", "types": "Boolean", "default": false },
+	  { "name": "unique", "types": "Boolean", "default": false },
+      { "name": "select", "types": "Boolean", "default": true },
+      { "name": "default", "types": "Str" },
+	  { "name": "ref", "types": "Str" },
+      { "name": "field", "types": "Str" }
+    ],
+	"Queries": [
+      { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+      { "name": "queryName", "types": "Str", "required": "true" },
+      { "name": "types", "types": "Str", "required": "true" },
+	  { "name": "nonNullTypes", "types": "Boolean", "default": false },
+	  { "name": "target", "types": "Str", "required": "true" },
+	  { "name": "nonNullTarget", "types": "Boolean", "default": false },  
+	  { "name": "description", "types": "Str" },
+	  { "name": "argumentsIDs", "types": "list", "ref": "QueryArgs", "field": "queryID" }
+	],
+	"QueryArgs": [
+	  { "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+	  { "name": "queryID", "types": "single", "ref": "Queries", "field": "argumentsIDs" },
+	  { "name": "argName", "types": "Str", "required": "true" },
+      { "name": "argType", "types": "Str", "required": "true" }
+	],
+	"Mutations": [
+		{ "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+		{ "name": "mutationName", "types": "Str", "required": "true" },
+		{ "name": "target", "types": "Str", "required": "true" },
+		{ "name": "description", "types": "Str" },
+		{ "name": "argumentsIDs", "types": "list", "ref": "MutationsArgs", "field": "mutationID" },
+		{ "name": "checksIDs", "types": "list", "ref": "MutationsChecks", "field": "mutationID" },
+		{ "name": "savingIDs", "types": "list", "ref": "MutationsSavings", "field": "mutationID" },
+		{ "name": "returnsIDs", "types": "list", "ref": "MutationsSavings", "field": "mutationID" }
+	],
+	"MutationsArgs": [
+		{ "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+		{ "name": "argName", "types": "Str", "required": "true" },
+		{ "name": "argType", "types": "Str", "required": "true" },
+		{ "name": "nonNullArg", "types": "Boolean", "default": false },
+		{ "name": "mutationID", "types": "single", "ref": "Mutations", "field": "argumentsIDs" }
+	],
+	"MutationsChecks": [
+		{ "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+		{ "name": "type", "types": "Boolean" },
+		{ "name": "checkTable", "types": "Str", "required": "true" },
+		{ "name": "checkFields", "types": "Str", "required": "true" },
+		{ "name": "mutationID", "types": "single", "ref": "Mutations", "field": "checksIDs" }
+	],
+	"MutationsSavings": [
+		{ "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+		{ "name": "saveTable", "types": "Str", "required": "true" },
+		{ "name": "saveField", "types": "Str", "required": "true" },
+		{ "name": "mutationID", "types": "single", "ref": "Mutations", "field": "savingIDs" }
+	],
+	"MutationsReturns": [
+		{ "name": "_id", "types": "ID", "required": "true", "unique": "true" },
+		{ "name": "field", "types": "Str", "required": "true" },
+		{ "name": "table", "types": "Str", "required": "true" },
+		{ "name": "mutationID", "types": "single", "ref": "Mutations", "field": "returnsIDs" }
+	]
+  },
+  "Queries": {
+    
+  },
+  "Mutations": {
+  }
+}

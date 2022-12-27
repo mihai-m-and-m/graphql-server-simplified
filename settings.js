@@ -11,7 +11,7 @@ const settings = {
   /**
    ** File location to define all Schema/Query/Mutation
    */
-  data: "./data_mysql.json",
+  data: "./setupData.json",
 
   /**
    ** Database type
@@ -71,7 +71,7 @@ const settings = {
    * @param `force` - will drop all tabels and recreate them
    * @param `tableName` - name of specific table you want to synchronize
    */
-  databaseSync: false,
+  databaseSync: `alter`,
 
   /**
    ** SQL optimize

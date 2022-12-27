@@ -32,5 +32,10 @@ server.use(
   })
 );
 
+// server.get("/dashboard", authMiddleware, (req, res) => {
+//   if (req.isAuth && req.token.info.adminlevel >= 0) res.sendFile(path.join(__dirname, "../dashboard/index.html"));
+//   else res.sendFile(path.join(__dirname, "../dashboard/login.html"));
+// });
+
 server.listen(PORT);
 console.log(`Backend running at ${HOST}:${PORT}${ENDPOINT} End-Point`);
