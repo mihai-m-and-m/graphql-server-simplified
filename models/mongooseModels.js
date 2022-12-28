@@ -2,9 +2,9 @@
  ** Create the Models using mongoose and assign "type" and options for each field **
  ***********************************************************************************/
 const mongoose = require("mongoose");
-const { error_set, errors_logs } = require("../../errors/error_logs");
-const { getAllSchemas } = require("../../data");
-const { settings } = require("../../settings");
+const { error_set, errors_logs } = require("../errors/error_logs");
+const { getAllSchemas } = require("../data");
+const { settings } = require("../settings");
 
 /*********************************************************************************
  ** Assign "type" and options for each field from each key inside "Schema" object

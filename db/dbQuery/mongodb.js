@@ -2,7 +2,7 @@
  ** MongoDB Database queries **
  ******************************/
 const { settings } = require("../../settings");
-const { models } = require("../../graphql/models/mongooseModels");
+const { models } = require("../../models/mongooseModels");
 const { validDBID } = require("../../utils/dataFormats");
 const { error_set } = require("../../errors/error_logs");
 
