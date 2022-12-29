@@ -103,6 +103,18 @@
     }
   },
   "Mutations": {
+    "deleteProduct": {
+      "target": "products",
+      "arguments": { "_id": "ID!" },
+      "checksT": [ { "products": ["_id"] } ],
+      "savings": [ { "products": ["delete"] } ]
+    },
+    "updateProduct__adminlevel__1": {
+      "target": "products",
+      "arguments": { "_id": "ID!", "name": "Str", "image": "Str", "description": "Str" },
+      "checksT": [ { "products": ["_id"] } ],
+      "savings": [ { "products": ["update"] } ]
+    },
     "register": {
       "target": "users",
       "arguments": { "username": "Str!", "email": "email!", "password": "encrypt!" },

@@ -62,7 +62,7 @@
     "getUsers__auth": {
       "types": "list",
       "description": "Get all users if no argument or a list of users based on argument/s",
-      "arguments": { "username": "Str", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "username": "Str", "searchBy": "searchBy" },
       "target": "users"
     },
     "getProduct__auth": {
@@ -74,7 +74,7 @@
     "getProducts": {
       "types": "list",
       "description": "Get all or a list of orders based on arguments",
-      "arguments": { "_id": "list", "searchBy": "searchBy" },
+      "arguments": { "_id": "ID", "searchBy": "searchBy", "sortBy": "sortBy" },
       "target": "products"
     },
     "getOrder__auth": {
@@ -103,6 +103,18 @@
     }
   },
   "Mutations": {
+    "deleteProduct": {
+      "target": "products",
+      "arguments": { "_id": "ID!" },
+      "checksT": [ { "products": ["_id"] } ],
+      "savings": [ { "products": ["delete"] } ]
+    },
+    "updateProduct": {
+      "target": "products",
+      "arguments": { "_id": "ID!", "name": "Str", "image": "Str", "description": "Str" },
+      "checksT": [ { "products": ["_id"] } ],
+      "savings": [ { "products": ["update"] } ]
+    },
     "register": {
       "target": "users",
       "arguments": { "username": "Str!", "email": "email!", "password": "encrypt!" },

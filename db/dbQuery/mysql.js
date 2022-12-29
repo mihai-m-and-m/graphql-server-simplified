@@ -190,6 +190,22 @@ const saveInDB = async (dbTable, argsValues) => {
   return result;
 };
 
+/*********************************************
+ ** Function used to delete object from database
+ * @param {String} dbTable Database table name
+ * @param {{}} argsValues Object with values to be saved
+ * @param {{}} result Object with values that was deleted
+ * @returns Promise with data created from database
+ */
+const deleteInDB = async (dbTable, argsValues, result) => {
+  try {
+    await sequelize.models[dbTable].destroy({ where: argsValues });
+  } catch (err) {
+    error_set("Internal database error", err);
+  }
+  return result[dbTable];
+};
+
 /******************************************
  ** Function used to update in database
  * @param {String} dbTable Database table name
@@ -203,6 +219,15 @@ const updateInDB = async (dbTable, fields, checkedObj, savedObj) => {
   const [field1, field2] = fields;
   let updatedResult = [];
   let multipleInserts = [];
+
+  if (field1.includes("update")) {
+    try {
+      await sequelize.models[dbTable].update(savedObj, { where: { _id: checkedObj[dbTable]._id } });
+    } catch (err) {
+      error_set("Internal database error", dbTable);
+    }
+    return await findIdInDB(dbTable, checkedObj[dbTable]._id);
+  }
 
   if (!sequelize.isDefined(dbTable)) {
     const [tb1, tb2] = dbTable.split("_");
@@ -233,6 +258,7 @@ const updateInDB = async (dbTable, fields, checkedObj, savedObj) => {
 };
 
 module.exports = {
+  deleteInDB,
   saveInDB,
   updateInDB,
   findOneInDB,

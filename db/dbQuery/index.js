@@ -75,6 +75,18 @@ const saveInDB = async (dbTable, argsValues = {}) => {
   return await saveInDB(dbTable, argsValues);
 };
 
+/*********************************************
+ ** Function used to delete object from database
+ * @param {String} dbTable Database table name
+ * @param {{}} argsValues Object with values to be saved
+ * @param {{}} result Object with values that was deleted
+ * @returns Promise with data created from database
+ */
+const deleteInDB = async (dbTable, argsValues = {}, result) => {
+  const { deleteInDB } = require(`./${dbType}`);
+  return await deleteInDB(dbTable, argsValues, result);
+};
+
 /******************************************
  ** Function used to update in database
  * @param {String} dbTable Database table name
@@ -89,6 +101,7 @@ const updateInDB = async (dbTable, fields, checkedObj, savedObj) => {
 };
 
 module.exports = {
+  deleteInDB,
   saveInDB,
   updateInDB,
   findOneInDB,

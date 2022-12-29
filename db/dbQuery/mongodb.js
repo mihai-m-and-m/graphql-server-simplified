@@ -137,6 +137,22 @@ const saveInDB = async (dbTable, argsValues) => {
   return result;
 };
 
+/*********************************************
+ ** Function used to delete object from database
+ * @param {String} dbTable Database table name
+ * @param {{}} argsValues Object with values to be saved
+ * @param {{}} result Object with values that was deleted
+ * @returns Promise with data created from database
+ */
+const deleteInDB = async (dbTable, argsValues, result) => {
+  try {
+    await models[dbTable].deleteMany(argsValues);
+  } catch (err) {
+    error_set("Internal database error", err);
+  }
+  return result[dbTable];
+};
+
 /******************************************
  ** Function used to update in database
  * @param {String} dbTable Database table name
@@ -144,22 +160,25 @@ const saveInDB = async (dbTable, argsValues) => {
  * @param {{}} resultObj Object response from checks
  * @param {{}} savedObj Object already created/saved
  * @returns Promise with updated data from database
- * TODO: updates for specific fields and values
- * TODO: validDBID not need yet because was already been checked inside resultObj
  */
 const updateInDB = async (dbTable, updateField, resultObj, savedObj) => {
-  // resultObj[dbTable].forEach((id) => validDBID(id));
   const condition = { _id: { $in: resultObj[dbTable] } };
-  const update = { $push: { [updateField]: savedObj._id } };
+  let update;
+
+  if (updateField.includes("update")) update = { $set: savedObj };
+  else update = { $push: { [updateField]: savedObj._id } };
+
   try {
     await models[dbTable].updateMany(condition, update);
   } catch (err) {
     error_set("Internal database error", err);
   }
+  if (updateField.includes("update")) return await findIdInDB(dbTable, resultObj[dbTable]._id);
   return savedObj;
 };
 
 module.exports = {
+  deleteInDB,
   findOneInDB,
   saveInDB,
   updateInDB,

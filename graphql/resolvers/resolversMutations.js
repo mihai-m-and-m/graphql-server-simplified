@@ -6,7 +6,7 @@ const { generateToken } = require("../../utils/jsonwebtoken");
 const { encrypt } = require("../../utils/encrypt");
 const { validEmail } = require("../../utils/dataFormats");
 const { error_set, errors_logs } = require("../../errors/error_logs");
-const { findOneInDB, saveInDB, updateInDB, findIdInDB, findInDB } = require("../../db/dbQuery");
+const { findOneInDB, saveInDB, updateInDB, findIdInDB, findInDB, deleteInDB } = require("../../db/dbQuery");
 const { settings } = require("../../settings");
 const db_type = settings.database;
 
@@ -114,17 +114,27 @@ const checkTrueFunction = async (checksT, argsObj, req) => {
  */
 const saveFunction = async (saver, argsObj, result) => {
   let obj = {};
+
   for (const save of saver) {
     const [table] = Object.keys(save);
     const [fields] = Object.values(save);
-    if (fields.length === 1 && fields.includes("save")) {
+    const saveType = ["save", "update", "delete"];
+    if (fields.length === 1 && saveType.some((item) => fields.includes(item))) {
       Object.keys(argsObj).forEach(function (key) {
         argsObj[key] = argsObj[key].value;
       });
-      obj = await saveInDB(table, argsObj);
+      if (fields.includes("delete")) obj = await deleteInDB(table, argsObj, result);
+      if (fields.includes("save")) obj = await saveInDB(table, argsObj);
     }
-    if (result?.[table] || result?.[fields[0]] || result?.[fields[1]]) obj = await updateInDB(table, fields, result, obj);
+    if (result?.[table] || result?.[fields[0]] || result?.[fields[1]])
+      if (fields.includes("update")) {
+        Object.keys(argsObj).forEach((key) => {
+          if (argsObj[key] === undefined || key === "_id") delete argsObj[key];
+        });
+        obj = await updateInDB(table, fields, result, argsObj);
+      } else obj = await updateInDB(table, fields, result, obj);
   }
+
   if (!obj) error_set("checkExisting_true", argsObj);
   return obj;
 };

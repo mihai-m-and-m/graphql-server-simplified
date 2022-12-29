@@ -56,6 +56,9 @@ const error_set = (text, args) => {
     case "notSavedInDB":
       text = "Not saved in Database";
       break;
+    case "notDeletedFromDB":
+      text = "Not deleted from Database";
+      break;
     case "noDatainDB":
       text = "Sorry, no information to display";
       break;
