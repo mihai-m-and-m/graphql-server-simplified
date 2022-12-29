@@ -34,8 +34,36 @@ const validDBID = (id) => {
   }
 };
 
+/***************************************************************
+ ** Select "fieldNodes" from query (selected fields to query DB)
+ * TODO: getQuerySubSelections AND getQuerySubArguments
+ */
+const getQuerySelections = ({ fieldNodes }) => {
+  return fieldNodes
+    .map((node) => node.selectionSet.selections)
+    .flat()
+    .map((s) => s.name.value)
+    .join(" ");
+};
+
+const getQuerySubSelections = ({ fieldNodes }) => {
+  const a = fieldNodes.map((node) => node.selectionSet.selections).flat();
+  const b = a.map((node) => node.selectionSet?.selections).flat();
+  const c = b.map((node) => node?.name?.value).filter((i) => i);
+};
+
+const getQuerySubArguments = ({ fieldNodes }) => {
+  return fieldNodes
+    .map((node) => node.selectionSet.selections)
+    .flat()
+    .filter((s) => s.arguments && s.arguments.length)
+    .map((s) => s.arguments)
+    .flat()
+    .filter((a) => a.kind === "Argument");
+};
+
 function capitalizeFirstLetter(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-module.exports = { validEmail, validDBID };
+module.exports = { validEmail, validDBID, getQuerySelections };

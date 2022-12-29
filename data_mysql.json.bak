@@ -113,7 +113,7 @@
       "target": "products",
       "arguments": { "_id": "ID!", "name": "Str", "image": "Str", "description": "Str", "categoryIDs": "list" },
       "checksT": [ { "products": ["_id"] } ],
-      "savings": [ { "products": ["update"] } ]
+      "savings": [ { "products": ["update"] }, { "products_category": [ "categoryIDs", "productsIDs"] } ]
     },
     "register": {
       "target": "users",

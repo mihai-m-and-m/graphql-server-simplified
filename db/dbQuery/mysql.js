@@ -5,6 +5,8 @@ const { sequelize, queryRelation } = require("../../models/sequelizeModels");
 const { settings } = require("../../settings");
 const { validDBID } = require("../../utils/dataFormats");
 const { error_set } = require("../../errors/error_logs");
+const { groupSQLList } = require("../../utils/groupResult");
+const { Op } = require("sequelize");
 
 /************************************************************
  ** Check for Associations and remove fields from selections
@@ -60,7 +62,6 @@ const getFunctionFromDatabase = async (dbTable, dbFields, whereValues = {}, orde
     } catch (err) {
       error_set("Internal database error", dbTable);
     }
-    result.length === 0 && error_set("noDatainDB", dbTable);
     return result;
   }
 
@@ -79,7 +80,6 @@ const getFunctionFromDatabase = async (dbTable, dbFields, whereValues = {}, orde
   } catch (err) {
     error_set("Internal database error", dbTable);
   }
-  result.length === 0 && error_set("noDatainDB", dbTable);
   return result;
 };
 
@@ -210,12 +210,12 @@ const deleteInDB = async (dbTable, argsValues, result) => {
  ** Function used to update in database
  * @param {String} dbTable Database table name
  * @param {Array} fields Array of fields
- * @param {{}} checkedResponse Object response from checks
+ * @param {{}} checkedObj Object response from checks
  * @param {{}} savedObj Object already created/saved
+ * @param {String} selections String with multiple fields separeted with space
  * @returns Promise with updated data from database
- * TODO: updates for specific fields and values
  */
-const updateInDB = async (dbTable, fields, checkedObj, savedObj) => {
+const updateInDB = async (dbTable, fields, checkedObj, savedObj, selections) => {
   const [field1, field2] = fields;
   let updatedResult = [];
   let multipleInserts = [];
@@ -226,7 +226,8 @@ const updateInDB = async (dbTable, fields, checkedObj, savedObj) => {
     } catch (err) {
       error_set("Internal database error", dbTable);
     }
-    return await findIdInDB(dbTable, checkedObj[dbTable]._id);
+    const result = await findWithArgsInDB(dbTable, selections, { _id: checkedObj[dbTable]._id });
+    return groupSQLList(result)[0];
   }
 
   if (!sequelize.isDefined(dbTable)) {
@@ -248,10 +249,15 @@ const updateInDB = async (dbTable, fields, checkedObj, savedObj) => {
     savedObj[field2] = updatedResult;
   }
 
+  const arguments = { [Op.or]: multipleInserts };
+  fields = fields.join(" ");
+  const result = await findWithArgsInDB(dbTable, fields, arguments);
+  if (result && result.length > 0) error_set("already exists");
+
   try {
     await sequelize.models[dbTable].bulkCreate(multipleInserts);
   } catch (err) {
-    error_set("Internal database error", dbTable);
+    error_set("Internal database error", err);
   }
 
   return savedObj;

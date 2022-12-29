@@ -4,7 +4,7 @@
 const bcrypt = require("bcryptjs");
 const { generateToken } = require("../../utils/jsonwebtoken");
 const { encrypt } = require("../../utils/encrypt");
-const { validEmail } = require("../../utils/dataFormats");
+const { validEmail, getQuerySelections } = require("../../utils/dataFormats");
 const { error_set, errors_logs } = require("../../errors/error_logs");
 const { findOneInDB, saveInDB, updateInDB, findIdInDB, findInDB, deleteInDB } = require("../../db/dbQuery");
 const { settings } = require("../../settings");
@@ -102,6 +102,7 @@ const checkTrueFunction = async (checksT, argsObj, req) => {
       // result[tableName] = findField?._doc;
     }
   }
+
   return [result, JWTFields];
 };
 
@@ -112,7 +113,8 @@ const checkTrueFunction = async (checksT, argsObj, req) => {
  * @param {PREVIOUS_RESULT} result
  * @returns
  */
-const saveFunction = async (saver, argsObj, result) => {
+const saveFunction = async (saver, argsObj, result, info) => {
+  const selections = getQuerySelections(info);
   let obj = {};
 
   for (const save of saver) {
@@ -126,13 +128,16 @@ const saveFunction = async (saver, argsObj, result) => {
       if (fields.includes("delete")) obj = await deleteInDB(table, argsObj, result);
       if (fields.includes("save")) obj = await saveInDB(table, argsObj);
     }
-    if (result?.[table] || result?.[fields[0]] || result?.[fields[1]])
+    if (result?.[table] || result?.[fields[0]] || result?.[fields[1]]) {
       if (fields.includes("update")) {
         Object.keys(argsObj).forEach((key) => {
           if (argsObj[key] === undefined || key === "_id") delete argsObj[key];
         });
-        obj = await updateInDB(table, fields, result, argsObj);
-      } else obj = await updateInDB(table, fields, result, obj);
+        obj = await updateInDB(table, fields, result, argsObj, selections);
+      } else {
+        obj = await updateInDB(table, fields, result, obj, selections);
+      }
+    }
   }
 
   if (!obj) error_set("checkExisting_true", argsObj);

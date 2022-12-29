@@ -110,7 +110,7 @@ NOTE: Because of different structure of multiple Databases the values differ. Pl
 | `encrypt`                                           | encrypt the field with highly secure bcryptjs package |
 | `!`                                                 | add at end of value to be required                    |
 | `jwt`                                               | value to be taken from `jsonwebtoken`                 |
-| All Schema Types (ID, INT, etc. See the rest above. |
+| All Schema Types (ID, INT, etc. See the rest above) |
 
 ### Special types for Mutations `checkT`
 
@@ -123,11 +123,13 @@ NOTE: Because of different structure of multiple Databases the values differ. Pl
 
 ### Special types for Mutations `saving` key
 
-| Value                | Description of value                              |
-| -------------------- | ------------------------------------------------- |
-| `save`               | save into specified table inside database         |
-| `<field/column>`     | update database field / column                    |
-| `<field1>__<field2>` | update database fields for Many-to-Many relations |
+| Value                | Description of value                               |
+| -------------------- | -------------------------------------------------- |
+| `save`               | save into specified table inside database          |
+| `delete`             | delete specific item from database based on \_id   |
+| `update`             | update specific item inside database based on \_id |
+| `<field/column>`     | update database field / column                     |
+| `<field1>__<field2>` | update database fields for Many-to-Many relations  |
 
 **INFO for MongoDB**
 
@@ -137,6 +139,7 @@ For example to insert one product in `products` collection with a specific categ
 **If we have the following schema simulating **Many to Many** relation**
 
 ```json
+
     "products": [
       { "name": "_id", "types": "ID"},
       { "name": "name", "types": "Str", "required": "true" },
@@ -154,12 +157,14 @@ For example to insert one product in `products` collection with a specific categ
 Observe the new object `{ "categories": ["productsIDs"] }` represent categories collection with productsIDs the field inside. But of course we need to add the "checksT" also to make sure we verify first the "id's" from arguments.
 
 ```json
+
     "productRegister": {
       "target": "products",
       "arguments": { "name": "Str!", "categoryIDs": "list"},
       "checksT": [ { "categories": ["categoryIDs"] } ],
       "savings": [ { "products": ["save"] }, { "categories": ["productsIDs"] } ]
     }
+
 ```
 
 **INFO for MySQL**
@@ -318,6 +323,18 @@ TimeStamps (`createdAt` and `updatedAt` fields with `from` and `to` Date scalar 
 ```json
 
   "Mutations": {
+    "deleteProduct": {
+      "target": "products",
+      "arguments": { "_id": "ID!" },
+      "checksT": [ { "products": ["_id"] } ],
+      "savings": [ { "products": ["delete"] } ]
+    },
+    "updateProduct__adminlevel__3": {
+      "target": "products",
+      "arguments": { "_id": "ID!", "name": "Str", "image": "Str", "description": "Str" },
+      "checksT": [ { "products": ["_id"] } ],
+      "savings": [ { "products": ["update"] } ]
+    },
     "register": {
       "target": "users",
       "arguments": { "username": "Str!", "email": "email!", "password": "encrypt!" },

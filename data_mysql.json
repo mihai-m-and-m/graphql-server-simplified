@@ -111,9 +111,9 @@
     },
     "updateProduct__adminlevel__1": {
       "target": "products",
-      "arguments": { "_id": "ID!", "name": "Str", "image": "Str", "description": "Str" },
-      "checksT": [ { "products": ["_id"] } ],
-      "savings": [ { "products": ["update"] } ]
+      "arguments": { "_id": "ID!", "name": "Str", "image": "Str", "description": "Str", "categoryIDs": "list" },
+      "checksT": [ { "products": ["_id"] }, { "category": ["categoryIDs"] } ],
+      "savings": [ { "products": ["update"] }, { "products_category": [ "categoryIDs", "productsIDs"] } ]
     },
     "register": {
       "target": "users",

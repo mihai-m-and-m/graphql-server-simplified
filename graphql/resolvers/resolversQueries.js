@@ -3,7 +3,7 @@
  ***********************/
 const { error_set, errors_logs } = require("../../errors/error_logs");
 const { groupSQLList } = require("../../utils/groupResult");
-const { validDBID } = require("../../utils/dataFormats");
+const { validDBID, getQuerySelections } = require("../../utils/dataFormats");
 const { findAllInDB, findWithArgsInDB } = require("../../db/dbQuery");
 const { settings } = require("../../settings");
 const { Op } = require("sequelize");
@@ -20,34 +20,6 @@ const operationsDB = (opName) => {
   if (settings.database === "mongodb") {
     return `$${opName}`;
   }
-};
-
-/***************************************************************
- ** Select "fieldNodes" from query (selected fields to query DB)
- * TODO: getQuerySubSelections AND getQuerySubArguments
- */
-const getQuerySelections = ({ fieldNodes }) => {
-  return fieldNodes
-    .map((node) => node.selectionSet.selections)
-    .flat()
-    .map((s) => s.name.value)
-    .join(" ");
-};
-
-const getQuerySubSelections = ({ fieldNodes }) => {
-  const a = fieldNodes.map((node) => node.selectionSet.selections).flat();
-  const b = a.map((node) => node.selectionSet?.selections).flat();
-  const c = b.map((node) => node?.name?.value).filter((i) => i);
-};
-
-const getQuerySubArguments = ({ fieldNodes }) => {
-  return fieldNodes
-    .map((node) => node.selectionSet.selections)
-    .flat()
-    .filter((s) => s.arguments && s.arguments.length)
-    .map((s) => s.arguments)
-    .flat()
-    .filter((a) => a.kind === "Argument");
 };
 
 /********************************************************************
@@ -172,6 +144,8 @@ const queriesResolvers = async (parent, args, context, info, fieldName) => {
 
   if (allArguments.length === 0) items = await findAllInDB(target, selection);
   else items = await findWithArgsInDB(target, selection, allArguments, order);
+
+  items.length === 0 && error_set("noDatainDB", target);
 
   const result = items.map((item) => item);
   if (types === "single") return result[0];

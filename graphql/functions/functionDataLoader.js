@@ -26,20 +26,14 @@ const batchIds = async (getIds, ref, selection) => {
         });
   }
   const ids = getAllIds.filter((i) => i);
+  const getDB = await findInDB(ref, ids, selection);
+  const groupedDB = groupSQLList(getDB);
+  groupedDB.forEach((element) => (sort[element._id] = element));
 
-  try {
-    const getDB = await findInDB(ref, ids, selection);
-    const groupedDB = groupSQLList(getDB);
-    groupedDB.forEach((element) => (sort[element._id] = element));
-
-    return getIds.map((key) => {
-      if (Array.isArray(key)) return key.map((id) => sort[id]);
-      return sort[key];
-    });
-  } catch (err) {
-    errors_logs(err);
-    error_set("DataLoader", ref + ids + err.message);
-  }
+  return getIds.map((key) => {
+    if (Array.isArray(key)) return key.map((id) => sort[id]);
+    return sort[key];
+  });
 };
 
 module.exports = { batchIds };

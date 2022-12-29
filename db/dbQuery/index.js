@@ -93,11 +93,12 @@ const deleteInDB = async (dbTable, argsValues = {}, result) => {
  * @param {Array} fields Array of fields
  * @param {{}} checkedResponse Object response from checks
  * @param {{}} savedObj Object already created/saved
+ * @param {String} selections String with multiple fields separeted with space
  * @returns Promise with updated data from database
  */
-const updateInDB = async (dbTable, fields, checkedObj, savedObj) => {
+const updateInDB = async (dbTable, fields, checkedObj, savedObj, selections) => {
   const { updateInDB } = require(`./${dbType}`);
-  return await updateInDB(dbTable, fields, checkedObj, savedObj);
+  return await updateInDB(dbTable, fields, checkedObj, savedObj, selections);
 };
 
 module.exports = {
