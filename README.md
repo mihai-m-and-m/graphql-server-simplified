@@ -6,17 +6,17 @@ Get a full GraphQL API server with `MongoDB` database OR `MySQL` database (for n
 
 # Summary
 
-[1 - How to use the server](https://github.com/mihai-m-and-m/backend#how-to-use-the-server)
+[1 - How to use the server](https://github.com/mihai-m-and-m/graphql-server-simplified#how-to-use-the-server)
 
-[2 - Define Schema (model, table, types](https://github.com/mihai-m-and-m/backend#1st-step---define-schema-model-table-types-with-single-definition)
+[2 - Define Schema (model, table, types](https://github.com/mihai-m-and-m/graphql-server-simplified#1st-step---define-schema-model-table-types-with-single-definition)
 
-[3 - Define Queries](https://github.com/mihai-m-and-m/backend#2nd-step---define-queries)
+[3 - Define Queries](https://github.com/mihai-m-and-m/graphql-server-simplified#2nd-step---define-queries)
 
-[4 - Define Mutations](https://github.com/mihai-m-and-m/backend#3rd-step---define-mutations)
+[4 - Define Mutations](https://github.com/mihai-m-and-m/graphql-server-simplified#3rd-step---define-mutations)
 
-[5 - Info](https://github.com/mihai-m-and-m/backend#info)
+[5 - Info](https://github.com/mihai-m-and-m/graphql-server-simplified#info)
 
-[6 - Code examples](https://github.com/mihai-m-and-m/backend#examples)
+[6 - Code examples](https://github.com/mihai-m-and-m/graphql-server-simplified#examples)
 
 This server includes `express, express-graphql, graphql, mongoose, cors, dataloader, dotenv, graphql-depth-limit, sequelize, sqlite3` packages as default.
 
@@ -24,7 +24,7 @@ Also using `bcryptjs` to encrypt special password field (or any other field if y
 
 ## How to use the server
 
-Clone repo or download it from [GitHub](https://github.com/mihai-m-and-m/backend.git) and run `npm install --legacy-peer-deps` command from any terminal but with Node.js previously installed [NodeDownload](https://nodejs.org/en/download/)
+Clone repo or download it from [GitHub](https://github.com/mihai-m-and-m/graphql-server-simplified.git) and run `npm install --legacy-peer-deps` command from any terminal but with Node.js previously installed [NodeDownload](https://nodejs.org/en/download/)
 
 Edit the `data.json` file as you need to create a fully functional backend express server with MongoDB database.
 Or change inside the settings.js file `data: "./data_mysql.json"` and `database: "mysql"` and `databaseSync: "force"` to get a fully functional backend express server with MySQL database.
