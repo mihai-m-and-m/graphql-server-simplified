@@ -5,6 +5,7 @@ const { graphqlHTTP } = require("express-graphql");
 const express = require("express");
 const cors = require("cors");
 const depthLimit = require("graphql-depth-limit");
+const compression = require("compression");
 const { loaderMiddleware } = require("../middleware/loaderMiddleware");
 const { authMiddleware } = require("../middleware/authMiddleware");
 const { settings } = require("../settings");
@@ -18,6 +19,7 @@ const ENDPOINT = process.env.GRAPHQL_ENDPOINT || "/graphql";
 server.use(
   ENDPOINT,
   cors(),
+  compression(),
   express.json(),
   authMiddleware,
   loaderMiddleware,
